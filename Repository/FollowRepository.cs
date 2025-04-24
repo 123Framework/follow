@@ -18,11 +18,24 @@ namespace TweeterApp.Repository
         public async Task AddAsync(int followerId, int followeeId)
         {
             var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId);
-            if (follow != null)
+            //if (follow != null)
+
+            /* {
+                 _context.Follows.Add(follow);
+                 await _context.SaveChangesAsync();
+             }*/
+            if (follow == null) 
             {
-                _context.Follows.Add(follow);
+                var newFollow = new FollowModel
+                {
+                    FollowerId = followerId,
+                    FolloweeId = followeeId,
+               
+                };
+                _context.Follows.Add(newFollow);
                 await _context.SaveChangesAsync();
             }
+
         }
 
 
@@ -58,5 +71,6 @@ namespace TweeterApp.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
     }
 }
