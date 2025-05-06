@@ -41,5 +41,23 @@ namespace TweeterApp.Controllers
             return RedirectToAction("Index", "Post");
         }
         // remove like function with _likeRepository.RemoveLikeAsync(like);
+        [HttpPost]
+        public async Task<IActionResult> UnlikePost(int PostId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (User == null)
+            {
+                return Unauthorized();
+            }
+            var post = await _postRepository.GetByIdAsync(PostId);
+            if (post == null) { 
+            return NotFound();
+            }
+            var like = await _likeRepository.GetLikeAsync(user.Id,PostId);
+            if (like != null) { 
+                await _likeRepository.RemoveLikeAsync(like);
+            }
+            return RedirectToAction("Index", "Post");
+        }
     }
 }

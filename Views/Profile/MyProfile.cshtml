@@ -1,0 +1,10 @@
+﻿@page
+@model ApplicationUser
+<h2>
+    @Model.UserName`s Profile
+</h2>
+<img src="@Model.AvatarPath" width="150" />
+<p><strong>Name:</strong>@Model.FirstName @Model.LastName</p>
+<p><strong>Bio:</strong>@Model.Bio</p>
+<a asp-action="Edit"> Edit Profile"</a>
+

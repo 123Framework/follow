@@ -11,15 +11,15 @@
         if (Model.IsFollowing){
             <form asp-controller="Follow" asp-action="UnFollow" method="post" style="display:inline">
                 <input type="hidden" name="followeeId" value="@Model.User.Id"/>
-                <button class="btn btn-outline-secondary">Unfollow</button>
+                <button class="btn btn-outline-secondary" type="submit">Unfollow</button>
             </form>
 
             
         }
 else{
-                <form asp-controller="Follow" asp-action="Follow" method="post" style="display:inline">
+                <form action="/Follow/Follow"  method="post" style="display:inline">
                     <input type="hidden" name="followeeId" value="@Model.User.Id"/>
-                    <button class="btn btn-outline-secondary">follow</button>
+                    <button class="btn btn-outline-secondary" type="submit">Follow</button>
                 </form>
             }
     }

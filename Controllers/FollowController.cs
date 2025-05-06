@@ -63,7 +63,7 @@ namespace TweeterApp.Controllers
 
             await _followRepository.RemoveAsync(user.Id,followeeId);
 
-            return RedirectToAction("Index", "User", new { userId = followeeId });
+            return RedirectToAction("Index", "Follow", new { userId = followeeId });
         }
     }
 }

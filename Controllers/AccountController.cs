@@ -31,8 +31,11 @@ namespace TweeterApp.Controllers
                     DateModified = DateTime.Now,
                     ActiveAccount = true,
                     GenderId = model.GenderId,
+                    AvatarPath = "/uploads/default.png",
+                    Bio = "-"
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, "User");

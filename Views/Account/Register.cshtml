@@ -3,47 +3,144 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<form asp-action="Register" method="post">
-    <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control"/>
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Password" class="control-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword" class="control-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="FirstName" class="control-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="LastName" class="control-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="DateOfBirth" class="control-label"></label>
-        <input asp-for="DateOfBirth" class="form-control" />
-        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="GenderId" class="control-label"></label>
-        <input asp-for="GenderId" class="form-control" />
-        <span asp-validation-for="GenderId" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
-
-<div>
-    <a asp-action="Login">Already have an account? Login</a>
+<div class="wrapper">
+    <h2>@ViewData["Title"]</h2>
+    <form asp-action="Register" method="post">
+        <div class="input-box">
+            <input asp-for="Email" class="form-control" placeholder="Email" required />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password" required />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password" required />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="FirstName" class="form-control" placeholder="First Name" required />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="LastName" class="form-control" placeholder="Last Name" required />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="DateOfBirth" class="form-control" placeholder="Date of Birth" required />
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+        <div class="input-box">
+            <input asp-for="GenderId" class="form-control" placeholder="Gender" required />
+            <span asp-validation-for="GenderId" class="text-danger"></span>
+        </div>
+        <div class="input-box button">
+            <button type="submit">Register</button>
+        </div>
+        <div class="text">
+            <h3>Already have an account? <a asp-action="Login">Login</a></h3>
+        </div>
+    </form>
 </div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #4070f4;
+    }
+
+    .wrapper {
+        max-width: 430px;
+        width: 100%;
+        background: #fff;
+        padding: 34px;
+        border-radius: 6px;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+
+        .wrapper h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            position: relative;
+        }
+
+            .wrapper h2::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 3px;
+                width: 28px;
+                background: #4070f4;
+                border-radius: 12px;
+            }
+
+    form {
+        margin-top: 30px;
+    }
+
+    .input-box {
+        height: 52px;
+        margin: 18px 0;
+        position: relative;
+    }
+
+        .input-box input {
+            height: 100%;
+            width: 100%;
+            padding: 0 15px;
+            font-size: 17px;
+            border: 1.5px solid #C7BEBE;
+            border-bottom-width: 2.5px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+            .input-box input:focus,
+            .input-box input:valid {
+                border-color: #4070f4;
+            }
+
+        .input-box span {
+            font-size: 12px;
+            color: red;
+            position: absolute;
+            bottom: -18px;
+            left: 0;
+        }
+
+        .input-box.button button {
+            width: 100%;
+            height: 100%;
+            background: #4070f4;
+            border: none;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+            .input-box.button button:hover {
+                background: #0e4bf1;
+            }
+
+    .text h3 {
+        text-align: center;
+        color: #333;
+        font-size: 14px;
+        margin-top: 10px;
+    }
