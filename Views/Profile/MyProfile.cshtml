@@ -1,10 +1,28 @@
-﻿@page
-@model ApplicationUser
-<h2>
-    @Model.UserName`s Profile
-</h2>
-<img src="@Model.AvatarPath" width="150" />
-<p><strong>Name:</strong>@Model.FirstName @Model.LastName</p>
-<p><strong>Bio:</strong>@Model.Bio</p>
-<a asp-action="Edit"> Edit Profile"</a>
+﻿@using TweeterApp.Models.ViewModels
+@model MyProfileViewModel
 
+
+<h2>
+    @Model.User.UserName`s Profile
+</h2>
+<img src="@Model.User.AvatarPath" width="150" />
+
+<p><strong>Name:</strong>@Model.User.FirstName @Model.User.LastName</p>
+<p><strong>Bio:</strong>@Model.User.Bio</p>
+<a asp-action="Edit"> Edit Profile</a>
+<hr />
+<h4>Folowers: @Model.Followers.Count</h4>
+<ul>
+    @foreach (var follower in Model.Followers)
+    {
+        <li>@follower.UserName</li>
+    }
+</ul>
+
+<h4>Following: @Model.Following.Count</h4>
+<ul>
+    @foreach (var followee in Model.Following)
+    {
+        <li>@followee.UserName</li>
+    }
+</ul>
