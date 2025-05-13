@@ -8,7 +8,7 @@
         <p>@post.Post.Content</p>
         <p>
             Author:
-            <a asp-controller="Follow" asp-action="Index" asp-route-userId="@post.Post.UserId">@post.Post.User.UserName</a>
+            <a asp-controller="Profile" asp-action="ViewProfile" asp-route-userId="@post.Post.UserId">@post.Post.User.UserName</a>
         </p>
         <p>Likes: @post.LikeCount</p>
 

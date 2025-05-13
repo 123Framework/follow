@@ -11,10 +11,10 @@ namespace TweeterApp.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _env;
-        public readonly FollowRepository _followRepository;
+        public readonly IFollowRepository _followRepository;
         
 
-        public ProfileController(UserManager<ApplicationUser> userManager, IWebHostEnvironment env, FollowRepository followRepository)
+        public ProfileController(UserManager<ApplicationUser> userManager, IWebHostEnvironment env, IFollowRepository followRepository)
         {
             _userManager = userManager;
             _env = env;
@@ -101,7 +101,27 @@ namespace TweeterApp.Controllers
                 Followers = followers.ToList(),
                 Following = following.ToList(),
             };
-            return View(user);
+            return View(model);
+        }
+        public async Task<IActionResult> ViewProfile(int userId)
+        {
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null && currentUser.Id == userId) { return RedirectToAction("MyProfile"); }
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return NotFound();
+
+            var followers = await _followRepository.GetFollowersAsync(user.Id);
+            var following = await _followRepository.GetFollowingAsync(user.Id);
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUser.Id,user.Id);
+            var model = new MyProfileViewModel
+            {
+                User = user,
+                Followers = followers.ToList(),
+                Following = following.ToList(),
+                isFollowing = isFollowing,
+            };
+            return View("MyProfile",model);
         }
 
 

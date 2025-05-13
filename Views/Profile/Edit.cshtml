@@ -2,6 +2,17 @@
 @model ProfileEditViewModel
 <form asp-action="Edit" enctype="multipart/form-data" method="post">
     <div class="form-group">
+        <label>Profile</label>
+        <hr />
+        @if (Model.CurrentAvatarPath != null)
+        {
+            <img src="@Model.CurrentAvatarPath" width="100" />
+        }
+        <input asp-for="Avatar" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif" />
+        <span asp-validation-for="Avatar" class="text-danger"></span>
+        
+    </div>
+    <div class="form-group">
         <label>First name</label>
         <input asp-for="FirstName" class="form-control" />
     </div>
@@ -15,14 +26,6 @@
         <textarea asp-for="Bio" class="form-control"> </textarea>
     </div>
 
-    <div class="form-group">
-        <label>Avatar</label>
-        <input asp-for="Avatar" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif" />
-        <span asp-validation-for="Avatar" class="text-danger"></span>
-        @if (Model.CurrentAvatarPath != null)
-        {
-            <img src="@Model.CurrentAvatarPath" width="100" />
-        }
-    </div>
+
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
