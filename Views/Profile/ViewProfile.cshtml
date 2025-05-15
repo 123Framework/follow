@@ -10,7 +10,7 @@
 <p><strong>Name:</strong>@Model.User.FirstName @Model.User.LastName</p>
 <p><strong>Bio:</strong>@Model.User.Bio</p>
 
-<!--@if (User.Identity.IsAuthenticated && User.Identity.Name != Model.User.Email)
+@if (User.Identity.IsAuthenticated && User.Identity.Name != Model.User.Email)
 {
     <form asp-controller="Follow" asp-action="@(Model.isFollowing ? "UnFollow" : "Follow")"
           method="post" style="display:inline">
@@ -21,8 +21,7 @@
     </form>
     
 }
-!-->
-<a asp-action="Edit"> Edit Profile</a>
+
 <hr />
 <h4>Folowers: @Model.Followers.Count</h4>
 <ul>

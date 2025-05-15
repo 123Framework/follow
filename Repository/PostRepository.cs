@@ -23,6 +23,8 @@ namespace TweeterApp.Repository
             var Post = await _context.Posts.FindAsync(id);
             if (Post != null)
             {
+                var likes = _context.Likes.Where(x => x.PostId == Post.Id);
+                _context.Likes.RemoveRange(likes);
                 _context.Posts.Remove(Post);
                 await _context.SaveChangesAsync();
             }

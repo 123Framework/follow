@@ -41,7 +41,7 @@ namespace TweeterApp.Data
                 .WithMany()
                 .HasForeignKey(f => f.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
-           
+           /*modelBuilder.Entity<LikeModel>().HasOne(i => i.PostP.WithMany().HasForeignKey(i => i.PostId).OnDelete(DeleteBehavior.Cascade);*/
         }
     } 
 }

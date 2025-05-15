@@ -121,7 +121,7 @@ namespace TweeterApp.Controllers
                 Following = following.ToList(),
                 isFollowing = isFollowing,
             };
-            return View("MyProfile",model);
+            return View("ViewProfile",model);
         }
 
 
