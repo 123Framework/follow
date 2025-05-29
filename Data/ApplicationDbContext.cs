@@ -12,6 +12,7 @@ namespace TweeterApp.Data
         {
             
         }
+        public DbSet<CommentModel> Comments { get; set; }
         public DbSet<PostModel> Posts { get; set; }
         public DbSet<FollowModel> Follows { get; set; }
         public DbSet<LikeModel> Likes { get; set; }
@@ -41,7 +42,12 @@ namespace TweeterApp.Data
                 .WithMany()
                 .HasForeignKey(f => f.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
-           /*modelBuilder.Entity<LikeModel>().HasOne(i => i.PostP.WithMany().HasForeignKey(i => i.PostId).OnDelete(DeleteBehavior.Cascade);*/
+            /*modelBuilder.Entity<LikeModel>().HasOne(i => i.PostP.WithMany().HasForeignKey(i => i.PostId).OnDelete(DeleteBehavior.Cascade);*/
+            modelBuilder.Entity<CommentModel>()
+                 .HasOne(c => c.Post)
+                 .WithMany(p => p.Comments)
+                 .HasForeignKey(c => c.PostId)
+                 .OnDelete(DeleteBehavior.Restrict);
         }
     } 
 }

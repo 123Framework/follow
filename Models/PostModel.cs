@@ -14,5 +14,8 @@ namespace TweeterApp.Models
         public int UserId { get; set; }
         public ApplicationUser User { get; set; }
 
+        public ICollection<CommentModel> Comments { get; set; }
+
+
     }
 }
