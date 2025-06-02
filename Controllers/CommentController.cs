@@ -31,7 +31,7 @@ namespace TweeterApp.Controllers
                 return NotFound();
             }
 
-            var comments = await _commentRepository.GetByIdAsync(postId);
+            var comments = await _commentRepository.GetByPostIdAsync(postId);
             return PartialView("_CommentsPartial", comments);
         }
 

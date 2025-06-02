@@ -12,6 +12,19 @@
         </p>
         <p>Likes: @post.LikeCount</p>
 
+        <div class="comments-section">
+            <h5>Comments</h5>
+            @foreach(var comment in post.Comments){
+                <div class="comment">
+                    <strong>@comment.User.UserName</strong>: @comment.Content
+            }
+            <a href="@Url.Action("Details","Post", new{id = post.Post.Id})">Ciew all comments</a>
+        </div>
+
+        <div class="comment-logo">
+            <img src="comment-icon.png" alt="Comment logo" />
+            </div>
+
         <!--<form action="/Like/@(post.IsLikedByCurrentUser ? "UnlikePost" : "LikePost")" method="post" style="display:inline">
             <input type="hidden" name="PostId" value="@post.Post.Id" />
             <button type="submit" class="btn btn-sm @(post.IsLikedByCurrentUser ? "btn-danger" : "btn-outline-danger")">

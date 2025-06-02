@@ -9,5 +9,7 @@ namespace TweeterApp.Repository
         Task AddAsync(CommentModel comment);
         Task UpdateAsync(CommentModel comment);
         Task DeleteAsync(int id);
+
+
     }
 }

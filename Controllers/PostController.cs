@@ -14,12 +14,13 @@ namespace TweeterApp.Controllers
         public readonly UserManager<ApplicationUser> _userManager;
         private ILogger<AccountController> _logger;
         public readonly ILikeRepository _likeRepository;
-
-        public PostController(IPostRepository postRepository, UserManager<ApplicationUser> userManager, ILogger<AccountController> logger, ILikeRepository likeRepository)
-        {
+        public readonly ICommentRepository _commentRepository;
+        public PostController(IPostRepository postRepository, UserManager<ApplicationUser> userManager, ILogger<AccountController> logger, ILikeRepository likeRepository, ICommentRepository commentRepository)
+            {
             _postRepository = postRepository;
             _likeRepository = likeRepository;
             _userManager = userManager;
+            _commentRepository = commentRepository;
             _logger = logger;
 
         }
@@ -30,15 +31,22 @@ namespace TweeterApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             var result = new List<PostViewModel>();
             
+
+
             foreach (var post in posts) {
                 var isLiked = await _likeRepository.IsLikedAsync(user.Id, post.Id);
                 var likeCount = await _likeRepository.GetLikeCountAsync(post.Id);
+
+
+                var comments = await _commentRepository.GetByPostIdAsync(post.Id);
+                post.Comments = comments.ToList();
 
                 result.Add(new PostViewModel
                 {
                     Post = post,
                     IsLikedByCurrentUser = isLiked,
-                    LikeCount = likeCount
+                    LikeCount = likeCount,
+                    Comments = comments.Take(3)
                 });
             }
             return View(result);
@@ -64,6 +72,24 @@ namespace TweeterApp.Controllers
             return RedirectToAction("Index");
 
             //return View(Post);
+        }
+
+
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var post = await _postRepository.GetByIdAsync(id);
+            if (post == null) return NotFound();
+
+            var user = await _userManager.GetUserAsync(User);
+            var comments = await _commentRepository.GetByPostIdAsync(id);
+
+            var viewModel = new PostDetailsViewModel
+            {
+                Post = post,
+                Comments = comments.ToList(),
+            };
+            return View(viewModel);
         }
 
         public async Task<IActionResult> GetPost(int id)
