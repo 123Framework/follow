@@ -16,6 +16,6 @@ namespace TweeterApp.Models
 
         public ICollection<CommentModel> Comments { get; set; }
 
-
+        public string? ImagePath { get; set; }
     }
 }

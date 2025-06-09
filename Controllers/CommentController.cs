@@ -92,7 +92,7 @@ namespace TweeterApp.Controllers
 
                 };
                 await _commentRepository.AddAsync(comment);
-                return RedirectToAction("Index", "Post", new { id = postId });
+                return RedirectToAction("Details", "Post", new { id = postId });
             }
 
 
@@ -115,6 +115,8 @@ namespace TweeterApp.Controllers
                 await _commentRepository.DeleteAsync(commentid);
                 return RedirectToAction("Index", "Post", new { postId = postId });
             }
+
+
 
         }
     }

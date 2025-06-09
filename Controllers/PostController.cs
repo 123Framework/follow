@@ -61,8 +61,23 @@ namespace TweeterApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PostModel Post)
+        public async Task<IActionResult> Create(PostModel Post, IFormFile imageFile)
         {
+            if ( imageFile != null && imageFile.Length > 0)
+            {
+                var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                if (allowedExtensions.Contains(extension)) {
+                    ModelState.AddModelError("Image", "Only .jpg, .jpeg, .png, .gif are allowed");
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", fileName);
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+                Post.ImagePath = "/uploads/" + fileName;
+            }
             //if (ModelState.IsValid)
 
             var user = await _userManager.GetUserAsync(User);
@@ -73,6 +88,8 @@ namespace TweeterApp.Controllers
 
             //return View(Post);
         }
+
+
 
 
 

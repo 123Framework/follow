@@ -33,6 +33,7 @@
   <ItemGroup>
     <Folder Include="SignalRChat\" />
     <Folder Include="Services\" />
+    <Folder Include="wwwroot\images\posts\" />
   </ItemGroup>
 
 </Project>
