@@ -3,47 +3,67 @@
 <a asp-action="Create" class="btn btn-primary">Create post</a>
 @foreach (var post in Model)
 {
-    <div class="post">
+
+    <div class="post border ">
         <h4>@post.Post.Title</h4>
         <p>@post.Post.Content</p>
+
         <p>
             Author:
             <a asp-controller="Profile" asp-action="ViewProfile" asp-route-userId="@post.Post.UserId">@post.Post.User.UserName</a>
         </p>
+        <div class="like-logo">
+            <img src="~/css/like.png" alt="Like logo" style="width: 24px; height: 24px" />
+        </div>
         <p>Likes: @post.LikeCount</p>
 
+
+        @if (!string.IsNullOrEmpty(post.Post.ImagePath)){
+            <div>
+                <img src="@post.Post.ImagePath" alt="Post Image" style="max-width: 100%; height: auto;"/>
+                </div>
+        }
+
         <div class="comments-section">
+            <div class="comment-logo">
+                <img src="~/css/comment.png" alt="Comment logo" style="width: 20px; height: 20px" />
+            </div>
             <h5>Comments</h5>
-            @foreach(var comment in post.Comments){
+            @foreach (var comment in post.Comments)
+            {
                 <div class="comment">
                     <strong>@comment.User.UserName</strong>: @comment.Content
+                    
+                    <hr />
+                    
+                </div>
+
             }
-            <a href="@Url.Action("Details","Post", new{id = post.Post.Id})">Ciew all comments</a>
+            
+            <a asp-action="Details" asp-controller="Post" asp-route-id="@post.Post.Id">View all comments</a>
+            <hr />
+            
+            @if (post.IsLikedByCurrentUser)
+            {
+                <form action="/Like/UnlikePost" method="post" style="display:inline">
+                    <input type="hidden" name="PostId" value="@post.Post.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">Unlike</button>
+                </form>
+            }
+            else
+            {
+                <form action="/Like/likePost" method="post" style="display:inline">
+                    <input type="hidden" name="PostId" value="@post.Post.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">like</button>
+                </form>
+            }
+            <a asp-action="Edit" asp-route-id="@post.Post.Id">Edit</a>
+            <a asp-action="Delete" asp-route-id="@post.Post.Id">Delete</a>
         </div>
 
-        <div class="comment-logo">
-            <img src="comment-icon.png" alt="Comment logo" />
-            </div>
-
-        <!--<form action="/Like/@(post.IsLikedByCurrentUser ? "UnlikePost" : "LikePost")" method="post" style="display:inline">
-            <input type="hidden" name="PostId" value="@post.Post.Id" />
-            <button type="submit" class="btn btn-sm @(post.IsLikedByCurrentUser ? "btn-danger" : "btn-outline-danger")">
-                @(post.IsLikedByCurrentUser ? "Unlike" : "Like")
-            </button>
-        </form>-->
-        @if (post.IsLikedByCurrentUser){
-            <form action="/Like/UnlikePost" method="post" style="display:inline">
-                <input type="hidden" name="PostId" value="@post.Post.Id" />
-                <button type="submit" class="btn btn-sm btn-danger">Unlike</button>
-            </form>
-        }
-        else{
-            <form action="/Like/likePost" method="post" style="display:inline">
-                <input type="hidden" name="PostId" value="@post.Post.Id" />
-                <button type="submit" class="btn btn-sm btn-danger">like</button>
-            </form>
-        }
-        <a asp-action="Edit" asp-route-id="@post.Post.Id">Edit</a>
-        <a asp-action="Delete" asp-route-id="@post.Post.Id">Delete</a>
     </div>
+
 }
+
+
+
