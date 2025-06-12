@@ -10,6 +10,6 @@ namespace TweeterApp.Repository
         Task UpdateAsync(CommentModel comment);
         Task DeleteAsync(int id);
 
-
+        Task<IEnumerable<CommentModel>> GetRecentCommentsByPostIdAsync(int postId, int count = 3);
     }
 }

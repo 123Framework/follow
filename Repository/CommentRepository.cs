@@ -46,5 +46,14 @@ namespace TweeterApp.Repository
             _context.Comments.Update(comment);
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<CommentModel>> GetRecentCommentsByPostIdAsync(int Postid, int count = 3)
+        {
+            return await _context.Comments
+                .Where(c => c.PostId == Postid)
+                .OrderByDescending(c => c.CreatedDate)
+                .Take(count)
+                .Include(c => c.User)
+                .ToListAsync();
+        }
     }
 }

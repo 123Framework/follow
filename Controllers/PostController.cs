@@ -67,11 +67,16 @@ namespace TweeterApp.Controllers
             {
                 var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                if (allowedExtensions.Contains(extension)) {
+                if (!allowedExtensions.Contains(extension)) {
                     ModelState.AddModelError("Image", "Only .jpg, .jpeg, .png, .gif are allowed");
                 }
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", fileName);
+                var path = Path.Combine(uploadsFolder, fileName);
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
                     await imageFile.CopyToAsync(stream);
