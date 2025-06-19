@@ -1,8 +1,23 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
+    var isAuthenticated = User.Identity.IsAuthenticated;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5 text-center">
+    <h1 class="display-4 mb-4">Welcome to Tweeter</h1>
+    <p class="lead mb-5"> See what people are posting!</p>
+
+    <div class="d-flex justify-content-center gap-3">
+        @if (!isAuthenticated)
+        {
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Login</a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Sign Up</a>
+        }
+        else
+        {
+            <p class="text-success">You're logged in as <strong>@User.Identity.Name</strong></p>
+        }
+
+        <a asp-controller="Post" asp-action="Index" class="btn btn-secondary btn-lg">View Posts</a>
+    </div>
 </div>

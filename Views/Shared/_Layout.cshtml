@@ -28,6 +28,33 @@
                         </li>
                     </ul>
                 </div>
+                <ul class="navbar-nav ms-auto">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Profile" asp-action="MyProfile">
+                                <img src="@currentUser.AvatarPath"
+                                     alt="Avatar"
+                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">Logout</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Sign Up</a>
+                        </li>
+                    }
+                </ul>
             </div>
         </nav>
     </header>
@@ -45,7 +72,13 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <link href=""
+    
     @await RenderSectionAsync("Scripts", required: false)
+    @using Microsoft.AspNetCore.Identity
+    @using TweeterApp.Models
+    @inject UserManager<ApplicationUser> UserManager
+    @inject SignInManager<ApplicationUser> SignInManager
+
+   
 </body>
 </html>
