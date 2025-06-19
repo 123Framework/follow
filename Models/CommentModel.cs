@@ -11,5 +11,8 @@
         public int PostId {  get; set; }
         
         public PostModel Post {  get; set; } 
+
+        public ICollection<CommentLikeModel> Likes { get; set; } = new List<CommentLikeModel>();
+        public int LikeCount => Likes?.Count ?? 0;
     }
 }

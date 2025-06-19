@@ -97,24 +97,28 @@ namespace TweeterApp.Controllers
         }
 
 
+
         // POST: CommentController/Delete/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteComment(int commentid, int postId)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int commentid)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return Unauthorized();
-            }
             var comment = await _commentRepository.GetByIdAsync(commentid);
-            if (comment == null || comment.UserId != user.Id)
+
+            if (comment == null)
             {
-                return Forbid();
+                return NotFound();
 
             }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null || comment.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
             await _commentRepository.DeleteAsync(commentid);
-            return RedirectToAction("Index", "Post", new { postId = postId });
+            return RedirectToAction("Details", "Post", new { Id = comment.PostId });
         }
         [HttpGet]
         public async Task<IActionResult> Delete(int id)

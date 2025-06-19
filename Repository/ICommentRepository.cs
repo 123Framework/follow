@@ -11,5 +11,10 @@ namespace TweeterApp.Repository
         Task DeleteAsync(int id);
 
         Task<IEnumerable<CommentModel>> GetRecentCommentsByPostIdAsync(int postId, int count = 3);
+
+        Task<bool> ToggleLikeAsync(int commentId, string userId);
+        Task<int> GetLikeCountAsync(int commentId);
+
+        Task<bool> IsLikedByCurrentUser(int commentId, string userId);
     }
 }

@@ -1,32 +1,32 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using TweeterApp.Models;
+using TweeterApp.Data;
+using TweeterApp.Models.ViewModels;
 
-namespace TweeterApp.Controllers
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly ApplicationDbContext _context;
+
+    public HomeController(ApplicationDbContext context)
     {
-        private readonly ILogger<HomeController> _logger;
+        _context = context;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+    public IActionResult Index()
+    {
+        var posts = _context.Posts
+            .OrderByDescending(p => p.CreatedDate)
+            .Select(p => new PostViewModel
+            {
+                Post = p,
+                Comments = _context.Comments
+                    .Where(c => c.PostId == p.Id)
+                    .OrderByDescending(c => c.CreatedDate)
+                    .ToList(),
+                LikeCount = 0, // сюда вставь реальное значение лайков, если считаешь
+                IsLikedByCurrentUser = false // тоже можно обновить, если у тебя есть лайки
+            })
+            .ToList();
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        return View(posts);
     }
 }

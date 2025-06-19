@@ -13,6 +13,7 @@ namespace TweeterApp.Data
             
         }
         public DbSet<CommentModel> Comments { get; set; }
+        public DbSet<CommentLikeModel> CommentLikes { get; set; }
         public DbSet<PostModel> Posts { get; set; }
         public DbSet<FollowModel> Follows { get; set; }
         public DbSet<LikeModel> Likes { get; set; }

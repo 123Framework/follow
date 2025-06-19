@@ -91,5 +91,11 @@ namespace TweeterApp.Controllers
             _signInManager = signInManager;
             _logger = logger;   
         }
+
+
+        [HttpGet]
+        public IActionResult AccessDenied() {
+            return View();
+        }
     }
 }
