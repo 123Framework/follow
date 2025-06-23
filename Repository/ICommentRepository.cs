@@ -16,5 +16,6 @@ namespace TweeterApp.Repository
         Task<int> GetLikeCountAsync(int commentId);
 
         Task<bool> IsLikedByCurrentUser(int commentId, string userId);
+        Task<IEnumerable<CommentModel>> GetCommentsFoPostAsync(int PostId, string currentUserId = null);
     }
 }

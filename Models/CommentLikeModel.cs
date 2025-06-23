@@ -2,7 +2,7 @@
 {
     public class CommentLikeModel
     {
-        public int id { get; set; }
+        public int Id { get; set; }
 
         public ApplicationUser User { get; set; }
         public string UserId { get; set; }

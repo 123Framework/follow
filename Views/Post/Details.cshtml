@@ -1,13 +1,16 @@
-﻿@model TweeterApp.Models.ViewModels.PostDetailsViewModel
+﻿@using TweeterApp.Repository
+@model TweeterApp.Models.ViewModels.PostDetailsViewModel
 
-    <h2>@Model.Post.Title</h2>
-    <p>@Model.Post.Content</p>
-    <h3>Comments</h3>
-    <p><strong>Author: </strong>@Model.Post.User.UserName</p>
-       
-       @await Html.PartialAsync("_CommentsPartial", Model.Comments)
-    
-    
+<h2>@Model.Post.Title</h2>
+<p>@Model.Post.Content</p>
+<h3>Comments</h3>
+<p><strong>Author: </strong>@Model.Post.User.UserName</p>
+
+@await Html.PartialAsync("_CommentsPartial", Model.Comments)
+
+@foreach (var comment in await CommentRepository.GetCommentsForPostAsync(Model.Id,_userRepository.GetCurrentUserId())){
+    @await Html.PartialAsync("_Comment", comment)
+ }   
 
 
 <!--РЕАлизовать просмотр и доабвение комментариев-->

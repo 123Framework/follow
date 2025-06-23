@@ -14,5 +14,6 @@
 
         public ICollection<CommentLikeModel> Likes { get; set; } = new List<CommentLikeModel>();
         public int LikeCount => Likes?.Count ?? 0;
+        public bool IsLikedByCurrentUser { get; set; }
     }
 }

@@ -5,10 +5,10 @@ using TweeterApp.Models;
 
 namespace TweeterApp.Repository
 {
-    
+
     public class CommentRepository : ICommentRepository
     {
-      private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         public CommentRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -21,7 +21,7 @@ namespace TweeterApp.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id )
+        public async Task DeleteAsync(int id)
         {
             var comment = await _context.Comments.FindAsync(id);
             if (comment != null)
@@ -63,7 +63,7 @@ namespace TweeterApp.Repository
         }
         public async Task<bool> IsLikedByCurrentUser(int commentId, string userId)
         {
-            return await _context.CommentLikes.AnyAsync(I=> I.CommentId == commentId && I.UserId == userId);
+            return await _context.CommentLikes.AnyAsync(I => I.CommentId == commentId && I.UserId == userId);
         }
         public async Task<bool> ToggleLikeAsync(int commentId, string userId)
         {
@@ -74,11 +74,27 @@ namespace TweeterApp.Repository
                 await _context.SaveChangesAsync();
                 return false;
             }
-            var like = new CommentLikeModel { CommentId = commentId , UserId = userId };
+            var like = new CommentLikeModel { CommentId = commentId, UserId = userId };
             _context.CommentLikes.Add(like);
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<IEnumerable<CommentModel>> GetCommentsForPostAsync(int postId, string currentUserId = null)
+        {
 
+            var comments = await _context.Comments.Where(c => c.PostId == postId)
+                .Include(c => c.UserId)
+                .Include(c => c.Likes)
+                .ToListAsync();
+            if (currentUserId != null)
+            {
+                foreach (var comment in comments)
+                {
+                    comment.IsLikedByCurrentUser = comment.Likes.Any(I => I.UserId == currentUserId);
+                }
+
+            }
+            return comments;
+        }
     }
 }

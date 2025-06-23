@@ -127,12 +127,26 @@ namespace TweeterApp.Controllers
             if (comment == null) return NotFound();
 
             var user = await _userManager.GetUserAsync(User);
-            if (comment.UserId != user.Id || user == null) {
+            if (comment.UserId != user.Id || user == null)
+            {
                 return Forbid();
             }
             return View(comment);
 
 
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleLike(int commentId, int postId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            await _commentRepository.ToggleLikeAsync(commentId, userId);
+            return RedirectToAction("Details", "Post", new { id = postId });
+        }
+
     }
 }
