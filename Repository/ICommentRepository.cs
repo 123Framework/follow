@@ -10,12 +10,9 @@ namespace TweeterApp.Repository
         Task UpdateAsync(CommentModel comment);
         Task DeleteAsync(int id);
 
-        Task<IEnumerable<CommentModel>> GetRecentCommentsByPostIdAsync(int postId, int count = 3);
 
-        Task<bool> ToggleLikeAsync(int commentId, string userId);
-        Task<int> GetLikeCountAsync(int commentId);
+        Task<bool> ToggleLikeAsync(int commentId, int userId);
 
-        Task<bool> IsLikedByCurrentUser(int commentId, string userId);
-        Task<IEnumerable<CommentModel>> GetCommentsFoPostAsync(int PostId, string currentUserId = null);
+        Task<IEnumerable<CommentModel>> GetCommentsForPostAsync(int postId, int? currentUserId = null);
     }
 }

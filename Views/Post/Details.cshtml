@@ -8,10 +8,6 @@
 
 @await Html.PartialAsync("_CommentsPartial", Model.Comments)
 
-@foreach (var comment in await CommentRepository.GetCommentsForPostAsync(Model.Id,_userRepository.GetCurrentUserId())){
-    @await Html.PartialAsync("_Comment", comment)
- }   
-
 
 <!--РЕАлизовать просмотр и доабвение комментариев-->
 <form asp-controller="Comment" asp-action="Add" method="post">

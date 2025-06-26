@@ -5,7 +5,7 @@
         public PostModel Post { get; set; }
         public IEnumerable<CommentModel> Comments { get; set; }
 
-
+        
     }
 
 }

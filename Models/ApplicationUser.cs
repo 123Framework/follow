@@ -14,5 +14,7 @@ namespace TweeterApp.Models
         public string Bio {  get; set; }
         public string AvatarPath { get; set; }
 
+        public ICollection<CommentModel> Comments { get; set; }
+
     }
 }
