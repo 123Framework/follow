@@ -139,7 +139,7 @@ namespace TweeterApp.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleLike(int commentId, int postId)
         {
-            var user = _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
             {

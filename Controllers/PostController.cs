@@ -94,7 +94,7 @@ namespace TweeterApp.Controllers
             //return View(Post);
         }
 
-
+        
 
 
 
@@ -105,10 +105,16 @@ namespace TweeterApp.Controllers
 
             var user = await _userManager.GetUserAsync(User);
             var comments = await _commentRepository.GetByPostIdAsync(id);
+            var isLiked = await _likeRepository.IsLikedAsync(user.Id, post.Id);
+            var LikeCount = await _likeRepository.GetLikeCountAsync(post.Id);
+
+
 
             var viewModel = new PostDetailsViewModel
             {
                 Post = post,
+                IsLikedByCurrentUser = isLiked,
+                LikeCount = LikeCount,
                 Comments = comments.ToList(),
             };
             return View(viewModel);

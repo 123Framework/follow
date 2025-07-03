@@ -21,6 +21,7 @@ namespace TweeterApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<FollowModel>()
                 .HasOne(f => f.Follower)
                 .WithMany()
@@ -56,6 +57,7 @@ namespace TweeterApp.Data
                  .WithMany(p => p.Comments)
                  .HasForeignKey(c => c.UserId)
                  .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<PostModel>()
                 .HasMany(p => p.Comments)
                  .WithOne(p => p.Post)
