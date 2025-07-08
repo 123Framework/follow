@@ -1,17 +1,36 @@
 ﻿@using TweeterApp.Repository
 @model TweeterApp.Models.ViewModels.PostDetailsViewModel
 
-<h2>@Model.Post.Title</h2>
-<p>@Model.Post.Content</p>
-<h3>Comments</h3>
-<p><strong>Author: </strong>@Model.Post.User.UserName</p>
+<div class="container mt-4">
+    <div class="card mb-4"> 
+        <div class="card-body">
+<h2 class="card-title">@Model.Post.Title</h2>
+            <p class="card-text">@Model.Post.Content</p>
+            <div class="d-flex align-items-center mt-3">
+                <img src="@Model.Post.User.AvatarPath" alt="User Avatar" style="width: 40px; height:40px; border-radius:50%;margin-right:10px;"/>
+                <span><strong>@Model.Post.User.UserName</strong></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header">
+
+    
+    <h3>Comments</h3>
+    </div>
+</div>
 
 @await Html.PartialAsync("_CommentsPartial", Model.Comments)
 
 
 <!--РЕАлизовать просмотр и доабвение комментариев-->
 <form asp-controller="Comment" asp-action="Add" method="post">
+
     <input type="hidden" name="postId" value="@Model.Post.Id"/>
     <textarea name="content" placeholder="Add a comment.." required></textarea>
     <button type="submit">Comment</button>
 </form>
+<style>
+
+</style>

@@ -10,6 +10,7 @@
 <h4>Leave a comment</h4>
 <form asp-action="Add" asp-controller="Comment" method="post">
     <div class="form-group">
+        <input type="hidden" name="PostId" value="@Model.Id"/>
         <textarea name="Content" class="form-control" placeholder="Write your comment here" rows="4"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>

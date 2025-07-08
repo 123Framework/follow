@@ -17,6 +17,7 @@ namespace TweeterApp.Data
         public DbSet<PostModel> Posts { get; set; }
         public DbSet<FollowModel> Follows { get; set; }
         public DbSet<LikeModel> Likes { get; set; }
+        public DbSet<NotificationModel> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

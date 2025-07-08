@@ -38,7 +38,16 @@ namespace TweeterApp.Repository
 
         public async Task<IEnumerable<CommentModel>> GetByPostIdAsync(int postId)
         {
-            return await _context.Comments.Include(c => c.User).Where(c => c.PostId == postId).OrderByDescending(c => c.CreatedDate).ToListAsync();
+            return await _context.Comments
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User)
+                .Include(c => c.Likes)
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
+
+
+
+
         }
 
         public async Task UpdateAsync(CommentModel comment)
@@ -61,7 +70,7 @@ namespace TweeterApp.Repository
             await _context.SaveChangesAsync();
             return true;
         }
-        public async Task<IEnumerable<CommentModel>> GetCommentsForPostAsync(int postId, int? currentUserId = null )
+        public async Task<IEnumerable<CommentModel>> GetCommentsForPostAsync(int postId, int? currentUserId = null)
         {
 
             var comments = await _context.Comments.Where(c => c.PostId == postId)
@@ -79,6 +88,6 @@ namespace TweeterApp.Repository
             return comments;
         }
 
-       
+
     }
 }
