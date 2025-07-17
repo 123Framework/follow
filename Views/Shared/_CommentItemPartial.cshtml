@@ -1,0 +1,22 @@
+﻿@model TweeterApp.Models.CommentModel
+
+<div class="ms-@((Model.ParentCommentId != null ? 4 : 0)) mb-3"
+     <div class="border p-2 rounded">
+         <p><strong>@Model.User.UserName</strong>-@Model.CreatedDate.ToString("g")</p>
+         <p>@Model.Content</p>
+
+         <form asp-controller="Comment" asp-action="AddComment" method="post" class="mt-2">
+         <input type="hidden" name="postId" value="@Model.Id"/>
+         <textarea name="content" class="form-control mb-1" placeholder="Reply..." required>
+
+         </textarea>
+         <button class="btn btn-sm btn-outline-secondary" type="submit">Reply</button>
+         </form>
+
+         @if (Model.Replies?.Any() == true){
+             @foreach (var reply in Model.Replies.OrderBy(r => r.CreatedDate)){
+                 @Html.Partial("_CommentItemPartial", reply)
+             }
+         }
+     </div>
+</div>

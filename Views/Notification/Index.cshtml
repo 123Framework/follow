@@ -1,0 +1,16 @@
+﻿@model IEnumerable<TweeterApp.Models.NotificationModel>
+<h2>Notifications</h2>
+@if(!Model.Any()){
+    <p>No notifications</p>
+}
+else{
+    foreach (var notification in Model){
+        <div class="alert alert-light border d-flex align-items-start mb-2">
+            <span class="me-2 text-warning" style="font-size:1.5rem;">🔔</span>
+            <div>
+                <p class="mb-1"><strong>@notification.Sender?.UserName</strong> - @notification.Message</p>
+                <small class="text-muted">@notification.CreatedAt.ToLocalTime().ToString("g")</small>
+            </div>
+        </div>
+    }
+}

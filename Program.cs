@@ -43,6 +43,8 @@ builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
+builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

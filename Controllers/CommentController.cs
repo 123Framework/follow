@@ -76,7 +76,7 @@ namespace TweeterApp.Controllers
         }
         // GET: CommentController/Delete/5
         [HttpPost]
-        public async Task<IActionResult> Add(int postId, string content)
+        public async Task<IActionResult> Add(int postId, string content, int? parentCommentId)
         {
             if (string.IsNullOrWhiteSpace(content))
             {
@@ -89,8 +89,8 @@ namespace TweeterApp.Controllers
                 PostId = postId,
                 Content = content,
                 CreatedDate = DateTime.UtcNow,
-                UserId = user.Id
-
+                UserId = user.Id,
+                ParentCommentId = parentCommentId
             };
             await _commentRepository.AddAsync(comment);
             return RedirectToAction("Details", "Post", new { id = postId });
@@ -145,6 +145,17 @@ namespace TweeterApp.Controllers
             {
                 return Forbid();
             }
+
+
+            bool liked = await _commentRepository.ToggleLikeAsync(commentId, postId);
+            if (liked)
+            {
+                TempData["Notification"] = "liked";
+            }
+            else {
+                TempData["Notification"] = "like removed";
+            }
+
             await _commentRepository.ToggleLikeAsync(commentId, user.Id);
             return RedirectToAction("Details", "Post", new { id = postId });
         }

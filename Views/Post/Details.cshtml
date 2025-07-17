@@ -9,6 +9,10 @@
             <div class="d-flex align-items-center mt-3">
                 <img src="@Model.Post.User.AvatarPath" alt="User Avatar" style="width: 40px; height:40px; border-radius:50%;margin-right:10px;"/>
                 <span><strong>@Model.Post.User.UserName</strong></span>
+                @if (!string.IsNullOrEmpty(Model.Post.ImagePath))
+                {
+                    <img src="@Model.Post.ImagePath" class="img-fluid mb-3" alt="Post Image"/>
+                }
             </div>
         </div>
     </div>
@@ -18,10 +22,11 @@
 
     
     <h3>Comments</h3>
+        @await Html.PartialAsync("_CommentsPartial", Model.Comments)
     </div>
 </div>
 
-@await Html.PartialAsync("_CommentsPartial", Model.Comments)
+
 
 
 <!--РЕАлизовать просмотр и доабвение комментариев-->
