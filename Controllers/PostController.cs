@@ -15,13 +15,15 @@ namespace TweeterApp.Controllers
         private ILogger<AccountController> _logger;
         public readonly ILikeRepository _likeRepository;
         public readonly ICommentRepository _commentRepository;
-        public PostController(IPostRepository postRepository, UserManager<ApplicationUser> userManager, ILogger<AccountController> logger, ILikeRepository likeRepository, ICommentRepository commentRepository)
+        private readonly ISavedPostRepository _savedPostRepository;
+        public PostController(IPostRepository postRepository, UserManager<ApplicationUser> userManager, ILogger<AccountController> logger, ILikeRepository likeRepository, ICommentRepository commentRepository, ISavedPostRepository savedPostRepository)
             {
             _postRepository = postRepository;
             _likeRepository = likeRepository;
             _userManager = userManager;
             _commentRepository = commentRepository;
             _logger = logger;
+            _savedPostRepository = savedPostRepository;
 
         }
 
@@ -36,7 +38,7 @@ namespace TweeterApp.Controllers
             foreach (var post in posts) {
                 var isLiked = await _likeRepository.IsLikedAsync(user.Id, post.Id);
                 var likeCount = await _likeRepository.GetLikeCountAsync(post.Id);
-
+                var IsSaved = await _savedPostRepository.IsPostSavedAsync(user.Id, post.Id);
 
                 var comments = await _commentRepository.GetByPostIdAsync(post.Id);
                 post.Comments = comments.ToList();
@@ -46,7 +48,9 @@ namespace TweeterApp.Controllers
                     Post = post,
                     IsLikedByCurrentUser = isLiked,
                     LikeCount = likeCount,
-                    Comments = comments.Take(3)
+                    Comments = comments.Take(3),
+                    IsSavedByCurrentUser = IsSaved,
+
                 });
             }
             return View(result);

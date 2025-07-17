@@ -21,9 +21,10 @@ namespace TweeterApp.Repository
                  .ToListAsync();
         }
 
-        public Task<bool> IsPostSavedAsync(int postId, int userId)
+        public async Task<bool> IsPostSavedAsync(int postId, int userId)
         {
-            throw new NotImplementedException();
+            return await _context.SavedPosts.AnyAsync(sp => sp.PostId == postId && sp.UserId == userId);
+
         }
 
         public async Task SavePostAsync(int postId, int userId)
@@ -37,9 +38,15 @@ namespace TweeterApp.Repository
             }
         }
 
-        public Task UnsavePostAsync(int postId, int userId)
+        public async Task UnsavePostAsync(int postId, int userId)
         {
-            throw new NotImplementedException();
+           var saved = await _context.SavedPosts.FirstOrDefaultAsync(sp => sp.PostId==postId && sp.UserId == userId);
+
+            if (saved != null)
+            {
+                _context.SavedPosts.Remove(saved);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

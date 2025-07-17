@@ -53,6 +53,12 @@
                                         </form>
                                     }
                                 </div>
+                                <form action="/SavedPost/Toggle" method="post" style="display:inline">
+                                    <input type="hidden" name="postId" value="@post.Post.Id"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-warning ms-2">
+                                        @(post.IsSavedByCurrentUser ? "🔖 Saved" : "💾 Save")
+                                    </button>
+                                </form>
                             </div>
 
                             <hr />
