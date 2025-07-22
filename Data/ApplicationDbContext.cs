@@ -72,6 +72,17 @@ namespace TweeterApp.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+           /* modelBuilder.Entity<SavedPostModel>()
+                .HasOne(sp => sp.Post)
+                .WithMany()
+                .HasForeignKey(sp => sp.Post)
+                .OnDelete(DeleteBehavior.Restrict);*/
+            
+            modelBuilder.Entity<SavedPostModel>()
+                .HasOne(sp => sp.User)
+                .WithMany()
+                .HasForeignKey(sp => sp.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

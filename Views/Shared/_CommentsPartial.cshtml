@@ -18,12 +18,17 @@
             </button>
             </form>
         </div>
-        @foreach (var comment in Model.Where(c => c.ParentCommentId == null))
-        {
-            @Html.Partial("_CommentItemPartial", comment)
-
-
-        }
+        
 
     </div>
+
+
+
 }
+@foreach (var comment in Model.Where(c => c.ParentCommentId == null))
+{
+    @Html.Partial("_CommentItemPartial", comment)
+
+
+}
+

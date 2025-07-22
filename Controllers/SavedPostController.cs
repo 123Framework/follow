@@ -14,8 +14,8 @@ namespace TweeterApp.Controllers
 
         public SavedPostController(ISavedPostRepository repository, UserManager<ApplicationUser> userManager)
         {
-            repository = _repository;
-            userManager = _userManager;
+            _repository = repository;
+            _userManager = userManager;
         }
         [HttpPost]
         public async Task<IActionResult> Toggle(int postId)

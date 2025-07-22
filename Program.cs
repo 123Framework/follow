@@ -45,6 +45,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
+builder.Services.AddScoped<ISavedPostRepository, SavedPostRepository>();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
