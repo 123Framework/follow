@@ -19,6 +19,7 @@ namespace TweeterApp.Data
         public DbSet<FollowModel> Follows { get; set; }
         public DbSet<LikeModel> Likes { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
+        public DbSet<MessageModel> Messages{ get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -72,16 +73,28 @@ namespace TweeterApp.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-           /* modelBuilder.Entity<SavedPostModel>()
+            modelBuilder.Entity<SavedPostModel>()
                 .HasOne(sp => sp.Post)
                 .WithMany()
-                .HasForeignKey(sp => sp.Post)
-                .OnDelete(DeleteBehavior.Restrict);*/
+                .HasForeignKey(sp => sp.PostId)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<SavedPostModel>()
                 .HasOne(sp => sp.User)
                 .WithMany()
                 .HasForeignKey(sp => sp.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MessageModel>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m =>  m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<MessageModel>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m =>  m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

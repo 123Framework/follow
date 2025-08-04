@@ -1,0 +1,24 @@
+﻿@model List<TweeterApp.Models.MessageModel>
+
+
+<h2>Outbox</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>TO</th>
+            <th>MEssage</th>
+            <th>Date</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach(var message in Model){
+            <tr>
+                <td>@message.Receiver?.UserName (@message.ReceiverId)</td>
+                <td>@message.Body</td>
+                <td>@message.SentAt.ToString("g")</td>
+            </tr>
+        }
+    </tbody>
+</table>

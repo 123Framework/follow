@@ -10,13 +10,13 @@
          <textarea name="content" class="form-control mb-1" placeholder="Reply..." required>
 
          </textarea>
-         <button class="btn btn-sm btn-outline-secondary" type="submit">Reply</button>
+         
          </form>
 
-         @if (Model.Replies?.Any() == true){
+         <!--@if (Model.Replies?.Any() == true){
              @foreach (var reply in Model.Replies.OrderBy(r => r.CreatedDate)){
-                 @Html.Partial("_CommentItemPartial", reply)
-             }
+                 @Html.Partial("_CommentItemPartial")
+             }-->
          }
      </div>
 </div>
