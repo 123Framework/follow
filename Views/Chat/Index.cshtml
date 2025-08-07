@@ -1,4 +1,4 @@
-﻿@{
+﻿<!--@{
     ViewData["Title"] = "Чат";
 
 }
@@ -16,8 +16,8 @@
         .withUrl("/chatHub")
         .build();
         connection.on("ReceiveMessage", function (user, message){
-            const li =arguments document.createElement("li");
-            li.textContent = ${user}:${message};
+            const li = document.createElement("li");
+            li.textContent = `${user}:${message}`;
 
         document.getElementById("messagesList").appendChild(li);
         });
@@ -33,3 +33,139 @@
         }
 
 </script>
+!-->
+@{
+    ViewData["Title"] = "Чат в реальном времени";
+}
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>Чат в реальном времени</h2>
+    </div>
+    <div class="chat-inputs">
+        <input type="text" id="userInput" placeholder="Имя получателя (username)" />
+        <input type="text" id="messageInput" placeholder="Сообщение" />
+        <button onclick="sendMessage()">Отправить</button>
+    </div>
+    <ul id="messagesList"></ul>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    const currentUsername = "@User.Identity?.Name";
+
+    connection.on("ReceiveMessage", function (user, message) {
+        const li = document.createElement("li");
+        li.classList.add("message");
+
+        if (user === currentUsername) {
+            li.classList.add("from-me");
+        } else {
+            li.classList.add("from-others");
+        }
+
+        li.textContent = `${user}: ${message}`;
+        document.getElementById("messagesList").appendChild(li);
+
+        // Автоскролл вниз
+        const messagesList = document.getElementById("messagesList");
+        messagesList.scrollTop = messagesList.scrollHeight;
+    });
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+    function sendMessage() {
+        const user = document.getElementById("userInput").value.trim();
+        const message = document.getElementById("messageInput").value.trim();
+        if (!user || !message) return;
+
+        connection.invoke("SendMessage", user, message).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // Очистка поля сообщения
+        document.getElementById("messageInput").value = "";
+    }
+</script>
+
+        <style>
+            .chat-container{
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 12px;
+                backgorund-color: #f8f9fa;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                font-family: Arial, sans-serif;
+            }
+
+
+            .chat-header{
+                text-align:center;
+                margin-bottom:15px;
+            }
+            .chat-inputs{
+                display: flex;
+                gap:10px;
+                margin-bottom:15px
+            }
+
+            .chat-inputs input{
+                flex:1;
+                padding:10px;
+                border-radius:8px;
+                border:1px solid #ccc;
+                font-size: 14px;
+
+            }
+            .chat-inputs button{
+                padding: 10px 15px;
+                border: none;
+                background-color:#007bff;
+                color:white;
+                border-radius:8px;
+                cursor:pointer;
+                transition: background-color 0.3s;
+            }
+
+            .chat-inputs:hover{
+                background-color:#0056b3;
+
+            }
+            #messagesList{
+                list-style-type:none;
+                padding:0;
+                max-height:400px;
+                overflow-y: auto;
+                display:flex;
+                flex-direction:column;
+                gap:10px;
+
+            }
+            .message{
+                max-width: 70%;
+                padding:10px;
+                border-radius:10px;
+                word-wrap: break-word;
+                font-size:14px;
+                position:relative;
+
+            }
+            .message.from-me{
+                align-self:flex-end;
+                background-color:#d1e7dd;
+                text-align:right;
+            }
+            .message.from-others{
+                align-self:flex-start;
+                background-color: #fff;
+                border:1px solid #ccc;
+            }
+
+        </style>
