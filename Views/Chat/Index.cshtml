@@ -12,160 +12,241 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
-        const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chatHub")
-        .build();
-        connection.on("ReceiveMessage", function (user, message){
-            const li = document.createElement("li");
-            li.textContent = `${user}:${message}`;
+const connection = new signalR.HubConnectionBuilder()
+.withUrl("/chatHub")
+.build();
+connection.on("ReceiveMessage", function (user, message){
+const li = document.createElement("li");
+li.textContent = `${user}:${message}`;
 
-        document.getElementById("messagesList").appendChild(li);
-        });
-        connection.start().catch(function (err){
-            return console.error(err.toString());
-        });
-        function sendMessage(){
-            const user = document.getElementById("userInput").value;
-            const message = document.getElementById("messageInput").value;
-            connection.invoke("SendMessage", user, message).catch(function (err){
-                return console.error(err.toString());
-            });
-        }
+document.getElementById("messagesList").appendChild(li);
+});
+connection.start().catch(function (err){
+return console.error(err.toString());
+});
+function sendMessage(){
+const user = document.getElementById("userInput").value;
+const message = document.getElementById("messageInput").value;
+connection.invoke("SendMessage", user, message).catch(function (err){
+return console.error(err.toString());
+});
+}
 
 </script>
 !-->
 @{
-    ViewData["Title"] = "Чат в реальном времени";
+    var otherUser = (string)(ViewData["OtherUser"] ?? "");
+    var currentUser = User?.Identity?.Name ?? "";
+    ViewData["Title"] = $"Чат с {otherUser}";
 }
 <div class="chat-container">
     <div class="chat-header">
-        <h2>Чат в реальном времени</h2>
+        <h2>Диалог с @otherUser</h2>
+        <div id="presence" class="presence">offline</div>
     </div>
+
+    <ul id="messagesList" class="messages"></ul>
+
     <div class="chat-inputs">
-        <input type="text" id="userInput" placeholder="Имя получателя (username)" />
         <input type="text" id="messageInput" placeholder="Сообщение" />
-        <button onclick="sendMessage()">Отправить</button>
+        <button id="sendBtn" type="button">Отправить</button>
     </div>
-    <ul id="messagesList"></ul>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-
 <script>
+    // из Razor
+    const otherUser   = "@otherUser";
+    const currentUser = "@currentUser";
+
     const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chatHub")
-        .build();
+      .withUrl("/chatHub")
+      .withAutomaticReconnect()
+      .build();
 
-    const currentUsername = "@User.Identity?.Name";
+    connection.onreconnecting(() => console.warn("Reconnecting..."));
+    connection.onreconnected(() => console.warn("Reconnected"));
+    connection.onclose(err => console.error("Closed:", err));
 
-    connection.on("ReceiveMessage", function (user, message) {
-        const li = document.createElement("li");
-        li.classList.add("message");
+    const messagesList  = document.getElementById("messagesList");
+    const messageInput  = document.getElementById("messageInput");
+    const sendBtn       = document.getElementById("sendBtn");
+    const presence      = document.getElementById("presence");
 
-        if (user === currentUsername) {
-            li.classList.add("from-me");
-        } else {
-            li.classList.add("from-others");
-        }
-
-        li.textContent = `${user}: ${message}`;
-        document.getElementById("messagesList").appendChild(li);
-
-        // Автоскролл вниз
-        const messagesList = document.getElementById("messagesList");
-        messagesList.scrollTop = messagesList.scrollHeight;
-    });
-
-    connection.start().catch(function (err) {
-        return console.error(err.toString());
-    });
-    function sendMessage() {
-        const user = document.getElementById("userInput").value.trim();
-        const message = document.getElementById("messageInput").value.trim();
-        if (!user || !message) return;
-
-        connection.invoke("SendMessage", user, message).catch(function (err) {
-            return console.error(err.toString());
-        });
-
-        // Очистка поля сообщения
-        document.getElementById("messageInput").value = "";
+    function escapeHtml(s){
+      const div = document.createElement("div");
+      div.innerText = s ?? "";
+      return div.innerHTML;
     }
+
+    function appendMessage(user, message, ts){
+      const li = document.createElement("li");
+      li.classList.add("message", user === currentUser ? "from-me" : "from-others");
+      const time = ts ? new Date(ts).toLocaleTimeString() : "";
+      li.innerHTML = `
+        <div class="bubble">
+          <div class="text">${escapeHtml(message)}</div>
+          <div class="meta">${escapeHtml(user)} · ${time}</div>
+        </div>`;
+      messagesList.appendChild(li);
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    connection.on("ReceiveMessage", (user, message, timestamp) => {
+      appendMessage(user, message, timestamp);
+    });
+
+    connection.on("PresenceChanged", (user, state) => {
+      if (user === otherUser) {
+        presence.textContent = state;
+        presence.className = "presence " + state;
+      }
+    });
+
+    connection.start()
+      .then(() => {
+        console.log("Connected, JoinDialog:", otherUser);
+        return connection.invoke("JoinDialog", otherUser);
+      })
+      .then(() => console.log("JoinDialog done"))
+      .catch(err => console.error("Start/Join error:", err));
+
+    async function sendMessage(){
+      const text = messageInput.value.trim();
+      if (!text) return;
+      try {
+        await connection.invoke("SendMessage", otherUser, text);
+        appendMessage(currentUser, text, new Date().toISOString());
+        messageInput.value = "";
+        messageInput.focus();
+      } catch (err) {
+        console.error("SendMessage error:", err);
+      }
+    }
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    window.addEventListener("beforeunload", () => {
+      connection.invoke("LeaveDialog", otherUser).catch(()=>{});
+    });
 </script>
 
-        <style>
-            .chat-container{
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 12px;
-                backgorund-color: #f8f9fa;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                font-family: Arial, sans-serif;
-            }
+<style>
+    .chat-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
 
+    .chat-header {
+        text-align: center;
+        margin-bottom: 15px;
+    }
 
-            .chat-header{
-                text-align:center;
-                margin-bottom:15px;
-            }
-            .chat-inputs{
-                display: flex;
-                gap:10px;
-                margin-bottom:15px
-            }
+    .presence {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        color: #374151;
+    }
 
-            .chat-inputs input{
-                flex:1;
-                padding:10px;
-                border-radius:8px;
-                border:1px solid #ccc;
-                font-size: 14px;
+        .presence.online {
+            background: #d1fae5;
+            color: #065f46;
+        }
 
-            }
-            .chat-inputs button{
-                padding: 10px 15px;
-                border: none;
-                background-color:#007bff;
-                color:white;
-                border-radius:8px;
-                cursor:pointer;
-                transition: background-color 0.3s;
-            }
+        .presence.offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
 
-            .chat-inputs:hover{
-                background-color:#0056b3;
+    .messages {
+        list-style: none;
+        padding: 0;
+        max-height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0 0 15px 0;
+    }
 
-            }
-            #messagesList{
-                list-style-type:none;
-                padding:0;
-                max-height:400px;
-                overflow-y: auto;
-                display:flex;
-                flex-direction:column;
-                gap:10px;
+    .message {
+        max-width: 70%;
+        padding: 0;
+        border-radius: 10px;
+        position: relative;
+    }
 
-            }
-            .message{
-                max-width: 70%;
-                padding:10px;
-                border-radius:10px;
-                word-wrap: break-word;
-                font-size:14px;
-                position:relative;
+        .message.from-me {
+            align-self: flex-end;
+        }
 
-            }
-            .message.from-me{
-                align-self:flex-end;
-                background-color:#d1e7dd;
-                text-align:right;
-            }
-            .message.from-others{
-                align-self:flex-start;
-                background-color: #fff;
-                border:1px solid #ccc;
-            }
+        .message.from-others {
+            align-self: flex-start;
+        }
 
-        </style>
+    .bubble {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .from-me .bubble {
+        background: #d1e7dd;
+    }
+
+    .text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 14px;
+    }
+
+    .meta {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #6b7280;
+        text-align: right;
+    }
+
+    .chat-inputs {
+        display: flex;
+        gap: 10px;
+    }
+
+        .chat-inputs input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .chat-inputs button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color .3s;
+        }
+
+            .chat-inputs button:hover {
+                background-color: #0056b3;
+            }
+</style>

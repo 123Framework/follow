@@ -6,6 +6,13 @@ namespace TweeterApp.Controllers
 
     public class ChatController : Controller
     {
+        [HttpGet("/chat/with/{username}")]
+        public IActionResult With(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return NotFound();
+            ViewData["OtherUser"] = username;
+            return View("index");
+        }
         /*
         private readonly ApplicationDbContext _context;
         public ChatController(ApplicationDbContext context)
