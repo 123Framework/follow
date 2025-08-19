@@ -32,11 +32,40 @@ namespace TweeterApp
         public async Task SendMessage(string toUsername, string message)
         {
             var fromUsername = Context.User.Identity.Name ?? "Anonymous";
-            if (_connections.TryGetValue(toUsername, out var connectionId))
+            if (string.IsNullOrWhiteSpace(toUsername)||string.IsNullOrWhiteSpace(message))
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveMessage", fromUsername, message);
+                return;
             }
+            var group = DialogGroup(fromUsername, toUsername);
+            var timestamp = DateTimeOffset.UtcNow;
+            await Clients.OthersInGroup(group).SendAsync("ReceiveMessage", fromUsername, message, timestamp);
 
+        }
+        private static string DialogGroup(string userA, string userB)
+        {
+            var a = userA.Trim().ToLowerInvariant();
+            var b = userB.Trim().ToLowerInvariant();
+            return string.CompareOrdinal(a, b) <= 0 ? $"{a}|{b}" : $"{b}|{a}";
+        }
+        public async Task JoinDialog(string otherUsername)
+        {
+            var me = Context.User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(me) || string.IsNullOrWhiteSpace(otherUsername))
+                return;
+
+            var group = DialogGroup(me, otherUsername);
+            await Groups.AddToGroupAsync(Context.ConnectionId, group);
+            await Clients.Group(group).SendAsync("PresenceChanged", me, "online");
+        }
+        public async Task LeaveDialog(string otherUsername)
+        {
+            var me = Context.User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(me) || string.IsNullOrWhiteSpace(otherUsername))
+                return;
+
+            var group = DialogGroup(me, otherUsername);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, group);
+            await Clients.Group(group).SendAsync("PresenceChanged", me, "offline");
         }
     }
 }

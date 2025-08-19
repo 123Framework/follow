@@ -6,7 +6,7 @@ namespace TweeterApp.Controllers
 
     public class ChatController : Controller
     {
-        [HttpGet("/chat/with/{username}")]
+        [HttpGet("/chat/with/{**username}")]
         public IActionResult With(string username)
         {
             if (string.IsNullOrWhiteSpace(username)) return NotFound();

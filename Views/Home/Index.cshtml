@@ -1,4 +1,5 @@
-﻿@{
+﻿@model StartChatViewModel
+@{
     ViewData["Title"] = "Home";
     var isAuthenticated = User.Identity.IsAuthenticated;
 }
@@ -21,3 +22,24 @@
         <a asp-controller="Post" asp-action="Index" class="btn btn-secondary btn-lg">View Posts</a>
     </div>
 </div>
+<div class="card">
+    <h2>Начать диалог</h2>
+    <form asp-action="StartChat" method="post" class="start-chat-form">
+        @Html.AntiForgeryToken()
+        <label for="recipient">Получатель</label>
+        <select id="recipient" name="SelectedEmail" class="select">
+            <option value="">-выберите пользователя-</option>
+            @foreach(var u in Model.Users){
+                <option value="@u">@u</option>
+
+            }
+        </select>
+        <button type="submit" class="btn">Перейти в чат</button>
+
+    </form>
+
+</div>
+<style>
+
+   .card{  max-width: 640px; margin: 24px auto; padding: 16px;  border:1px solid #e5e7eb; border-radius:12px; background:#fff;  box-shadow:0 2px 10px rgba(0,0,0,.05); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}h2{ margin:0 0 12px 0; }.start-chat-form{ display:flex; flex-direction:column; gap:10px; }.label{ font-weight:600; }.select,.input{  padding:10px; border:1px solid #d1d5db; border-radius:10px; font-size:14px;}.btn{  align-self:flex-start; padding:10px 16px; border:none; border-radius:10px;  background:#007bff; color:#fff; cursor:pointer; font-weight:600;}.btn:hover{ background:#0056b3; }.or{ font-size:12px; color:#6b7280; margin:4px 0; }
+</style>
