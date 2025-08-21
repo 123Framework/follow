@@ -79,21 +79,42 @@ return console.error(err.toString());
       return div.innerHTML;
     }
 
-    function appendMessage(user, message, ts){
+    function appendMessage(user, message, ts, id){
       const li = document.createElement("li");
       li.classList.add("message", user === currentUser ? "from-me" : "from-others");
+
+      if (id) li.dataset.id = id;
+
+
       const time = ts ? new Date(ts).toLocaleTimeString() : "";
       li.innerHTML = `
         <div class="bubble">
           <div class="text">${escapeHtml(message)}</div>
           <div class="meta">${escapeHtml(user)} · ${time}</div>
-        </div>`;
+        </div>
+        
+        <div class="reactions">
+        
+        </div>
+
+        <div class="react-bar">
+        <button class="r" type="button" data-emoji="👍">👍</button>
+        <button class="r" type="button" data-emoji="❤️">❤️</button>
+        <button class="r" type="button" data-emoji="😂">😂</button>
+        <button class="r" type="button" data-emoji="🔥">🔥</button>
+        </div>
+        
+        `;
+
+
+
       messagesList.appendChild(li);
       messagesList.scrollTop = messagesList.scrollHeight;
     }
 
-    connection.on("ReceiveMessage", (user, message, timestamp) => {
-      appendMessage(user, message, timestamp);
+    connection.on("ReceiveMessage", (id,user, message, timestamp) => {
+
+      appendMessage(user, message, timestamp, id);
     });
 
     connection.on("PresenceChanged", (user, state) => {
@@ -102,6 +123,28 @@ return console.error(err.toString());
         presence.className = "presence " + state;
       }
     });
+    connection.on("ReactionUpdated", ({messageId, emoji, count})=>
+    {
+        const li =messagesList.querySelector(`li.message[data-id=$"{messageId}"]`);
+
+        if (!li) return;
+        const reactions = li.querySelector(".reactions");
+        let chip = reactions.querySelector(`.reaction-chip[data-emoji="${emoji}"]`);
+        if (!chip){
+            chip=document.createElement("span");
+            chip.className = "reaction-chip";
+            chip.dataset.emoji = emoji;
+            reactions.appendChild(chip);
+        }
+        if (count > 0){
+            chip.textContent = `${emoji} ${count}`;
+            chip.style.display = "inline-flex";
+
+        }else{
+            chip.remove();
+        }
+    });
+
 
     connection.start()
       .then(() => {
@@ -137,6 +180,27 @@ return console.error(err.toString());
 </script>
 
 <style>
+    .reactions{
+        display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;
+    }
+    .reaction-chip{
+        font-size:12px;padding:2px 6px; border-radius:999px;
+        border:1px solid #e5e7eb; background: #fff;
+    }
+
+    .react-bar{
+        display:none;
+        gap:6px;
+        margin-top:6px;
+    }
+    .react-bar .r{
+        padding:2px 6px;
+        border:1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+    }
+    .message:hover .react-bar{display:flex}
     .chat-container {
         max-width: 600px;
         margin: 0 auto;
