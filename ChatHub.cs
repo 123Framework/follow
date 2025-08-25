@@ -42,7 +42,8 @@ namespace TweeterApp
             var group = DialogGroup(fromUsername, toUsername);
             var timestamp = DateTimeOffset.UtcNow;
             var id = Guid.NewGuid().ToString("N");
-            await Clients.OthersInGroup(group).SendAsync("ReceiveMessage",id, fromUsername, message, timestamp);
+            await Clients.Group(group).SendAsync("ReceiveMessage",id, fromUsername, message, timestamp);
+
 
         }
 
@@ -96,7 +97,7 @@ namespace TweeterApp
                 users[me] = 1;
                 added = true;
             }
-            var count = users.Count();
+            var count = users.Count;
             if (count == 0)
             {
                 _reactions.TryRemove(key, out _);

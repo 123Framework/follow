@@ -125,7 +125,7 @@ return console.error(err.toString());
     });
     connection.on("ReactionUpdated", ({messageId, emoji, count})=>
     {
-        const li =messagesList.querySelector(`li.message[data-id=$"{messageId}"]`);
+        const li =messagesList.querySelector(`li.message[data-id="${messageId}"]`);
 
         if (!li) return;
         const reactions = li.querySelector(".reactions");
@@ -159,7 +159,6 @@ return console.error(err.toString());
       if (!text) return;
       try {
         await connection.invoke("SendMessage", otherUser, text);
-        appendMessage(currentUser, text, new Date().toISOString());
         messageInput.value = "";
         messageInput.focus();
       } catch (err) {
