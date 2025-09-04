@@ -11,6 +11,11 @@ namespace TweeterApp
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _reactions = new();
 
         private static string ReactionKey(string messageId, string emoji) => $"{messageId}::{emoji}";
+        private static string UserMsgKey(string messageId, string user) => $"{messageId}::{user}";
+
+        private static readonly ConcurrentDictionary<string, string> _userReactionByMessage = new();
+
+
         public override Task OnConnectedAsync()
         {
             var username = Context.User.Identity.Name;
@@ -42,7 +47,7 @@ namespace TweeterApp
             var group = DialogGroup(fromUsername, toUsername);
             var timestamp = DateTimeOffset.UtcNow;
             var id = Guid.NewGuid().ToString("N");
-            await Clients.Group(group).SendAsync("ReceiveMessage",id, fromUsername, message, timestamp);
+            await Clients.Group(group).SendAsync("ReceiveMessage", id, fromUsername, message, timestamp);
 
 
         }
@@ -85,31 +90,61 @@ namespace TweeterApp
 
             var group = DialogGroup(me, toUsername);
             var key = ReactionKey(messageId, emoji);
-            var users = _reactions.GetOrAdd(key, _ => new ConcurrentDictionary<string, byte>());
+
+
+            //var users = _reactions.GetOrAdd(key, _ => new ConcurrentDictionary<string, byte>());
+
+            var mukey = UserMsgKey(messageId, me);
             bool added;
-            if (users.ContainsKey(me))
+            if (_userReactionByMessage.TryGetValue(mukey, out var existingEmoji))
             {
-                users.TryRemove(me, out _);
-                added = false;
+                if (existingEmoji == emoji)
+                {
+                    var users = _reactions.GetOrAdd(ReactionKey(messageId, emoji), _ => new ConcurrentDictionary<string, byte>());
+                    users.TryRemove(me, out _);
+                    _userReactionByMessage.TryRemove(mukey, out _);
+
+                    var count = users.Count;
+                    if (count == 0) _reactions.TryRemove(ReactionKey(messageId, emoji), out _);
+
+
+
+
+                    await Clients.Group(group).SendAsync("ReactionUpdated", new
+                    {
+                        messageId,
+                        emoji,
+                        count,
+                        user = me,
+                        added = false,
+
+                    });
+                    return;
+                }
+                else
+                {
+                    var oldKey = ReactionKey(messageId, existingEmoji);
+                    var oldUsers = _reactions.GetOrAdd(oldKey, _ => new ConcurrentDictionary<string, byte>());
+                    oldUsers.TryRemove(me, out _);
+                    var oldCount = oldUsers.Count;
+                    if (oldCount == 0) _reactions.TryRemove(oldKey, out _);
+                }
             }
-            else
+
+        }
+        public async Task SendImage(string toUsername, string imageUrl, string? caption = null)
+        {
+            var from = Context.User?.Identity?.Name ?? "Anonymous";
+            if (string.IsNullOrEmpty(toUsername) || string.IsNullOrWhiteSpace(imageUrl))
             {
-                users[me] = 1;
-                added = true;
+                return;
             }
-            var count = users.Count;
-            if (count == 0)
-            {
-                _reactions.TryRemove(key, out _);
-            }
-            await Clients.Group(group).SendAsync("ReactionUpdated", new
-            {
-                messageId,
-                emoji,
-                count,
-                user = me,
-                added
-            });
+            var group = DialogGroup(from, toUsername);
+            var id = Guid.NewGuid().ToString("N");
+            var timestamp = DateTime.UtcNow;
+
+            await Clients.Group(group).SendAsync("ReceiveImage", id, from, imageUrl, caption, timestamp);
+
         }
     }
 }

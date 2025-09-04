@@ -48,6 +48,8 @@ return console.error(err.toString());
     <ul id="messagesList" class="messages"></ul>
 
     <div class="chat-inputs">
+        <button id="photoBtn" type="button" title="Отправить фото">📷</button>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" />
         <input type="text" id="messageInput" placeholder="Сообщение" />
         <button id="sendBtn" type="button">Отправить</button>
     </div>
@@ -73,11 +75,47 @@ return console.error(err.toString());
     const sendBtn       = document.getElementById("sendBtn");
     const presence      = document.getElementById("presence");
 
+    const fileInput = document.getElementById("fileInput");
+    const photoBtn = document.getElementById("photoBtn");
+
+
+
+
     function escapeHtml(s){
       const div = document.createElement("div");
       div.innerText = s ?? "";
       return div.innerHTML;
     }
+
+    function appendImage(user,imageUrl, caption, ts,id){
+        const li = document.createElement("li");
+        li.classList.add("message", user === currentUser? "from-me" : "from-others");
+        if (id) li.dataset.id = id;
+        const time = ts ? new Date(ts).toLocaleTimeString() : "";
+        li.innerHTML = `<div class="bubble">
+        <a href="${imageUrl}" target="_blank" rel="noopener">
+        <img src="${imageUrl} alt="image" class="img-msg" />
+        </a>
+        ${caption ? `<div class="text"> ${escapeHtml(caption) }</div>` : ""}
+        <div class="meta">${escapeHtml(user)} · ${time}</div>
+        </div>
+
+        <div class="reactions">
+
+        </div>
+
+        <div class="react-bar">
+        <button class="r" type="button" data-emoji="👍">👍</button>
+        <button class="r" type="button" data-emoji="❤️">❤️</button>
+        <button class="r" type="button" data-emoji="😂">😂</button>
+        <button class="r" type="button" data-emoji="🔥">🔥</button>
+        <button class="r" type="button" data-emoji="😭">😭</button>
+        <button class="r" type="button" data-emoji="🤬">🤬</button>
+        </div>
+        `
+    }
+    messagesList.appendChild(li);
+    messagesList.scrollTop = messagesList.scrollHeight;
 
     function appendMessage(user, message, ts, id){
       const li = document.createElement("li");
@@ -92,9 +130,9 @@ return console.error(err.toString());
           <div class="text">${escapeHtml(message)}</div>
           <div class="meta">${escapeHtml(user)} · ${time}</div>
         </div>
-        
+
         <div class="reactions">
-        
+
         </div>
 
         <div class="react-bar">
@@ -102,8 +140,10 @@ return console.error(err.toString());
         <button class="r" type="button" data-emoji="❤️">❤️</button>
         <button class="r" type="button" data-emoji="😂">😂</button>
         <button class="r" type="button" data-emoji="🔥">🔥</button>
+        <button class="r" type="button" data-emoji="😭">😭</button>
+        <button class="r" type="button" data-emoji="🤬">🤬</button>
         </div>
-        
+
         `;
 
 
@@ -115,6 +155,12 @@ return console.error(err.toString());
     connection.on("ReceiveMessage", (id,user, message, timestamp) => {
 
       appendMessage(user, message, timestamp, id);
+
+    });
+    connection.on("ReceiveMessage", (id,user, url, caption, ts) => {
+
+      appendMessage(user, url, caption, ts, id);
+
     });
 
     connection.on("PresenceChanged", (user, state) => {
@@ -176,30 +222,87 @@ return console.error(err.toString());
     window.addEventListener("beforeunload", () => {
       connection.invoke("LeaveDialog", otherUser).catch(()=>{});
     });
+    messagesList.addEventListener("click", (e) => {
+        const btn = e.target.closest(".r");
+        if (!btn) return;
+        const li = e.target.closest("li.message");
+        const messageId = li?.dataset.id;
+        if (!messageId) return;
+
+        const emoji = btn.dataset.emoji;
+        connection.invoke("ToggleReaction", otherUser, messageId, emoji)
+        .catch(err => console.error("ToggleReaction error:", err));
+    });
+
+
+    photoBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", async () =>{
+        const file = fileInput.files?.[0];
+        if !file return;
+
+        try{
+            const fd = new FormData();
+            fd.append("file", file);
+
+            const res = await fetch("/chat/upload",{
+                method: "POST",
+                body: fd,
+
+            });
+
+            if(!res.ok){
+                console.error("Upload failed", await res.text());
+                return;
+            }
+            const {url} = await res.json();
+            await connection.invoke("SendImage",otherUser, url, /*caption*/ null);
+        }
+        catch(e){
+            console.error("Upload error", e;
+
+        }
+        finally{
+            fileInput.value = "";
+        }
+
+    }
+
 </script>
 
 <style>
-    .reactions{
-        display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;
-    }
-    .reaction-chip{
-        font-size:12px;padding:2px 6px; border-radius:999px;
-        border:1px solid #e5e7eb; background: #fff;
+    .reactions {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        flex-wrap: wrap;
     }
 
-    .react-bar{
-        display:none;
-        gap:6px;
-        margin-top:6px;
-    }
-    .react-bar .r{
-        padding:2px 6px;
-        border:1px solid #e5e7eb;
-        border-radius: 8px;
+    .reaction-chip {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
         background: #fff;
-        cursor: pointer;
     }
-    .message:hover .react-bar{display:flex}
+
+    .react-bar {
+        display: none;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+        .react-bar .r {
+            padding: 2px 6px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+    .message:hover .react-bar {
+        display: flex
+    }
+
     .chat-container {
         max-width: 600px;
         margin: 0 auto;
