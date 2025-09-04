@@ -20,7 +20,7 @@ namespace TweeterApp.Controllers
 
             }
 
-            var allowed = new[] { ".jpg", ".jpeg", "png", ".gif", ".webp" };
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowed.Contains(ext)) 
                 return BadRequest("unsupported");

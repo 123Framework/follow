@@ -34,7 +34,6 @@
     <Folder Include="SignalRChat\" />
     <Folder Include="Services\" />
     <Folder Include="wwwroot\images\posts\" />
-    <Folder Include="wwwroot\uploads\" />
     <Folder Include="wwwroot\Новая папка\" />
   </ItemGroup>
 
