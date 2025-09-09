@@ -95,7 +95,7 @@ return console.error(err.toString());
 
             li.innerHTML = `
         <div class="bubble">
-          <a href="${imageUrl}" target="_blank" rel="noopener noreferrer">
+          <a href="${imageUrl}" target="_blank" >
             <img src="${imageUrl}" alt="image" class="img-msg" />
           </a>
           ${caption ? `<div class="text">${escapeHtml(caption)}</div>` : ""}
@@ -159,7 +159,7 @@ messagesList.appendChild(li);
     });
     connection.on("ReceiveImage", (id,user, url, caption, ts) => {
 
-      appendMessage(user, url, caption, ts, id);
+      appendImage(user, url, caption, ts, id);
 
     });
 
@@ -244,7 +244,7 @@ messagesList.appendChild(li);
             const fd = new FormData();
             fd.append("file", file);
 
-            const res = await fetch("/chat/upload",{
+            const res = await fetch("/chat/uploads",{
                 method: "POST",
                 body: fd,
 
