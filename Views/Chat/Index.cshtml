@@ -92,27 +92,26 @@ return console.error(err.toString());
         li.classList.add("message", user === currentUser? "from-me" : "from-others");
         if (id) li.dataset.id = id;
         const time = ts ? new Date(ts).toLocaleTimeString() : "";
-        li.innerHTML = `<div class="bubble">
-        <a href="${imageUrl}" target="_blank" rel="noopener">
-        <img src="${imageUrl}" alt="image" class="img-msg" />
-        </a>
-        ${caption ? `<div class="text"> ${escapeHtml(caption) }</div>` : ""}
-        <div class="meta">${escapeHtml(user)} · ${time}</div>
+
+            li.innerHTML = `
+        <div class="bubble">
+          <a href="${imageUrl}" target="_blank" rel="noopener noreferrer">
+            <img src="${imageUrl}" alt="image" class="img-msg" />
+          </a>
+          ${caption ? `<div class="text">${escapeHtml(caption)}</div>` : ""}
+          <div class="meta">${escapeHtml(user)} · ${time}</div>
         </div>
-
-        <div class="reactions">
-
-        </div>
-
+        <div class="reactions"></div>
         <div class="react-bar">
-        <button class="r" type="button" data-emoji="👍">👍</button>
-        <button class="r" type="button" data-emoji="❤️">❤️</button>
-        <button class="r" type="button" data-emoji="😂">😂</button>
-        <button class="r" type="button" data-emoji="🔥">🔥</button>
-        <button class="r" type="button" data-emoji="😭">😭</button>
-        <button class="r" type="button" data-emoji="🤬">🤬</button>
+          <button class="r" type="button" data-emoji="👍">👍</button>
+          <button class="r" type="button" data-emoji="❤️">❤️</button>
+          <button class="r" type="button" data-emoji="😂">😂</button>
+          <button class="r" type="button" data-emoji="🔥">🔥</button>
+          <button class="r" type="button" data-emoji="😭">😭</button>
+          <button class="r" type="button" data-emoji="🤬">🤬</button>
         </div>
-        `
+      `;
+        
 messagesList.appendChild(li);
     messagesList.scrollTop = messagesList.scrollHeight;
     }
