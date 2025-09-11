@@ -20,6 +20,8 @@ namespace TweeterApp.Data
         public DbSet<LikeModel> Likes { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<MessageModel> Messages{ get; set; }
+        public DbSet<FriendModel> Friendships => Set<FriendModel>();
+        
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -96,6 +98,15 @@ namespace TweeterApp.Data
                 .WithMany()
                 .HasForeignKey(m =>  m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<FriendModel>().HasIndex(x => new { x.RequesterUserName, x.AddresseeUserName }).IsUnique();
+
+            modelBuilder.Entity<FriendModel>().Property(x => x.RequesterUserName).HasMaxLength(256).IsRequired();
+
+            modelBuilder.Entity<FriendModel>().Property(x => x.AddresseeUserName).HasMaxLength(256).IsRequired();
+
         }
     }
 }

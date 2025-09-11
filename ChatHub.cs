@@ -128,9 +128,14 @@ namespace TweeterApp
                     oldUsers.TryRemove(me, out _);
                     var oldCount = oldUsers.Count;
                     if (oldCount == 0) _reactions.TryRemove(oldKey, out _);
+                    await Clients.Group(group).SendAsync("ReactionUpdated", new { messageId, emoji = existingEmoji, count = oldCount, user = me, added = false });
                 }
             }
-
+            var newUsers = _reactions.GetOrAdd(ReactionKey(messageId, emoji), _ => new ConcurrentDictionary<string, byte>());
+            newUsers[me] = 1;
+            _userReactionByMessage[mukey] = emoji;
+            var newCount = newUsers.Count();
+            await Clients.Group(group).SendAsync("ReactionUpdated", new { messageId, emoji, count = newCount, user = me, added = true});
         }
         public async Task SendImage(string toUsername, string imageUrl, string? caption = null)
         {
@@ -146,5 +151,7 @@ namespace TweeterApp
             await Clients.Group(group).SendAsync("ReceiveImage", id, from, imageUrl, caption, timestamp);
 
         }
+
+
     }
 }

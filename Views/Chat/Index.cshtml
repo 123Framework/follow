@@ -244,7 +244,7 @@ messagesList.appendChild(li);
             const fd = new FormData();
             fd.append("file", file);
 
-            const res = await fetch("/chat/uploads",{
+            const res = await fetch("/chat/upload",{
                 method: "POST",
                 body: fd,
 
