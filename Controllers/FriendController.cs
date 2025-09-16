@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -48,7 +48,7 @@ namespace TweeterApp.Controllers
                 .Select(f => f.AddresseeUserName)
                 .ToListAsync();
 
-                return Ok(new { incoming, outgoing });
+            return Ok(new { incoming, outgoing });
 
         }
         [HttpPost("request")]
@@ -59,7 +59,7 @@ namespace TweeterApp.Controllers
             if (string.IsNullOrWhiteSpace(toUserName) || toUserName == me) return BadRequest();
 
 
-            var exists = await _db.Friendships.AnyAsync(f =>(f.RequesterUserName == me && f.AddresseeUserName == toUserName)||(f.RequesterUserName == toUserName && f.AddresseeUserName == me));
+            var exists = await _db.Friendships.AnyAsync(f => (f.RequesterUserName == me && f.AddresseeUserName == toUserName) || (f.RequesterUserName == toUserName && f.AddresseeUserName == me));
             if (!exists) return Conflict("Already exists");
             _db.Friendships.Add(new FriendModel
             {
@@ -70,7 +70,51 @@ namespace TweeterApp.Controllers
             await _db.SaveChangesAsync();
             await _hub.Clients.User(toUserName).SendAsync("FriendReuquestIncoming", me);
             return Ok();
-        } 
+        }
+        public class RespondDto
+        {
+            public string FromUserName { get; set; } = "";
+            public bool Accept { get; set; }
+        }
+        [HttpPost("respond")]
+        public async Task<IActionResult> Respond([FromBody] RespondDto dto)
+        {
+            var me = User.Identity!.Name!;
+            var fr = await _db.Friendships.FirstOrDefaultAsync(f =>
+            f.RequesterUserName == dto.FromUserName &&
+            f.AddresseeUserName == me &&
+            f.Status == FriendshipStatus.Pending);
+
+            if (fr == null) return NotFound();
+
+            fr.Status = dto.Accept ? FriendshipStatus.Accepted : FriendshipStatus.Declined;
+            fr.RespondedAt = DateTimeOffset.UtcNow;
+            await _db.SaveChangesAsync();
+            
+            await _hub.Clients.User(dto.FromUserName).SendAsync("FriendRequestResult", me, dto.Accept ? "accepted" : "declined");
+
+            await _hub.Clients.User(me).SendAsync("FriendListUpdated");
+
+            return Ok();
+        }
+
+        [HttpPost("remove")]
+        public async Task<IActionResult> Remove([FromBody] string other)
+        {
+            var me = User.Identity!.Name;
+
+
+            var fr = await _db.Friendships.FirstOrDefaultAsync(f =>(f.RequesterUserName == me && f.AddresseeUserName == other) || 
+            (f.RequesterUserName == other && f.AddresseeUserName == me));
+
+        if (fr == null) return NotFound();
+        _db.Friendships.Remove(fr);
+            await _db.SaveChangesAsync();
+
+            await _hub.Clients.Users(me, other).SendAsync("FriendListUpdated");
+            return Ok();
+        }
+
         
     }
 }
