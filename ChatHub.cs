@@ -1,6 +1,9 @@
 ﻿
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
+using TweeterApp.Data;
+using TweeterApp.Models;
 
 namespace TweeterApp
 
@@ -9,6 +12,8 @@ namespace TweeterApp
     {
         private static ConcurrentDictionary<string, string> _connections = new();
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _reactions = new();
+        private readonly ApplicationDbContext _db;
+        public ChatHub(ApplicationDbContext db) => _db = db;
 
         private static string ReactionKey(string messageId, string emoji) => $"{messageId}::{emoji}";
         private static string UserMsgKey(string messageId, string user) => $"{messageId}::{user}";
@@ -39,19 +44,28 @@ namespace TweeterApp
 
         public async Task SendMessage(string toUsername, string message)
         {
-            var fromUsername = Context.User.Identity.Name ?? "Anonymous";
-            if (string.IsNullOrWhiteSpace(toUsername) || string.IsNullOrWhiteSpace(message))
+            //var fromUsername = Context.User.Identity.Name ?? "Anonymous";
+            var me = Context.User?.Identity?.Name?.Trim().ToLowerInvariant() ?? "";
+            toUsername = toUsername?.Trim().ToLowerInvariant() ?? "";
+            if (string.IsNullOrWhiteSpace(toUsername)|| string.IsNullOrWhiteSpace(me) || string.IsNullOrWhiteSpace(message))
             {
                 return;
             }
-            var group = DialogGroup(fromUsername, toUsername);
+
+            if (!await AreFriends(me, toUsername, Context.ConnectionAborted)) { return; }
+            
+            var group = DialogGroup(me, toUsername);
             var timestamp = DateTimeOffset.UtcNow;
             var id = Guid.NewGuid().ToString("N");
-            await Clients.Group(group).SendAsync("ReceiveMessage", id, fromUsername, message, timestamp);
+            await Clients.Group(group).SendAsync("ReceiveMessage", id, me, message, timestamp);
 
 
         }
 
+        private Task<bool> AreFriends(string a, string b, CancellationToken ct = default) => _db.Friendships
+            .AsNoTracking()
+            .AnyAsync(f => f.Status == FriendshipStatus.Accepted && ((f.RequesterUserName == a && f.AddresseeUserName == b) ||  
+            (f.RequesterUserName == b && f.AddresseeUserName == a)), ct);
 
         private static string DialogGroup(string userA, string userB)
         {
@@ -139,16 +153,22 @@ namespace TweeterApp
         }
         public async Task SendImage(string toUsername, string imageUrl, string? caption = null)
         {
-            var from = Context.User?.Identity?.Name ?? "Anonymous";
-            if (string.IsNullOrEmpty(toUsername) || string.IsNullOrWhiteSpace(imageUrl))
+            //var from = Context.User?.Identity?.Name ?? "Anonymous";
+
+            var me = Context.User?.Identity?.Name?.Trim().ToLowerInvariant() ?? "";
+            toUsername = toUsername?.Trim().ToLowerInvariant() ?? "";
+            if (string.IsNullOrWhiteSpace(toUsername) || string.IsNullOrWhiteSpace(me) || string.IsNullOrWhiteSpace(imageUrl))
             {
                 return;
             }
-            var group = DialogGroup(from, toUsername);
+
+            if (!await AreFriends(me, toUsername, Context.ConnectionAborted)) { return; }
+
+            var group = DialogGroup(me, toUsername);
             var id = Guid.NewGuid().ToString("N");
             var timestamp = DateTime.UtcNow;
 
-            await Clients.Group(group).SendAsync("ReceiveImage", id, from, imageUrl, caption, timestamp);
+            await Clients.Group(group).SendAsync("ReceiveImage", id, me, imageUrl, caption, timestamp);
 
         }
 

@@ -60,7 +60,8 @@ return console.error(err.toString());
     // из Razor
     const otherUser   = "@otherUser";
     const currentUser = "@currentUser";
-
+    const friends = await (await fetch("/friends")).json();
+    const {incoming, outgoing} = await (await fetch("/friends/requests").json();
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("/chatHub")
       .withAutomaticReconnect()
