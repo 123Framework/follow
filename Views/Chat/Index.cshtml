@@ -1,4 +1,4 @@
-﻿<!--@{
+<!--@{
     ViewData["Title"] = "Чат";
 
 }
@@ -59,9 +59,17 @@ return console.error(err.toString());
 <script>
     // из Razor
     const otherUser   = "@otherUser";
+
     const currentUser = "@currentUser";
+    (async () => {
+        try{
     const friends = await (await fetch("/friends")).json();
     const {incoming, outgoing} = await (await fetch("/friends/requests").json();
+    console.log("friends", friends, "incoming", incoming, "outgoing", outgoing);
+        }
+    catch(e){console.error("friends load error", e);}
+    }) ();
+    
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("/chatHub")
       .withAutomaticReconnect()
@@ -267,6 +275,26 @@ messagesList.appendChild(li);
         }
 
     });
+
+
+
+    async function loadFriends(){
+        const res = await fetch("/friends");
+        if(!res.ok){
+            console.error("Ошибка загрузки друзей", await res.text());
+            return [];
+        }
+        return await res.json();
+    }
+    async function loadRequests(){
+        const res = await fetch("/friends/request");
+        if (!res.ok){
+            console.error("Ошибка загузки заявок", await res.text());
+            return {incoming: [], outgoing: []};
+        }
+        return await res.json();
+
+    }
 
 </script>
 
