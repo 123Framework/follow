@@ -22,7 +22,7 @@ namespace TweeterApp.Controllers
             _db = db;
             _hub = hub;
         }
-        [HttpGet]
+        [HttpGet("list")]
         public async Task<IActionResult> List()
         {
             var me = User.Identity!.Name!;
@@ -31,7 +31,7 @@ namespace TweeterApp.Controllers
                 .Select(f => f.RequesterUserName == me ? f.AddresseeUserName : f.RequesterUserName)
                 .OrderBy(s => s)
                 .ToListAsync();
-            return Ok(friends);
+            return Ok(new { friends });
         }
 
         // GET /friends/pending
@@ -230,7 +230,7 @@ namespace TweeterApp.Controllers
             await _hub.Clients.Users(me, other).SendAsync("FriendListUpdated");
             return Ok();
         }
-        [HttpGet("status/{otherUserName")]
+        [HttpGet("status/{otherUserName}")]
         public async Task<IActionResult> Status(string otherUserName)
         {
             var me = User.Identity!.Name!;

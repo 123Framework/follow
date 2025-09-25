@@ -33,7 +33,7 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script>
             async function loadAll(){
-                await Promise.all([loadFriends(), loadPending]);
+                await Promise.all([loadFriends(), loadPending()]);
             }
             async function loadFriends(){
                 const res = await fetch('/friends/list');
@@ -64,7 +64,7 @@
                 const incoming = document.getElementById('incomingList');
                 const outgoing = document.getElementById('outgoingList');
                 incoming.innerHTML = '';
-                outgoing,innerHTML = '';
+                outgoing.innerHTML = '';
 
             (data.incoming || []).forEach(u =>{
                 const li = document.createElement("li");
@@ -78,7 +78,7 @@
                     await fetch('/friends/accept',{
                         method: 'POST',
                         headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({with UserName: u})
+                        body: JSON.stringify({withUserName: u})
                     });
                     await loadAll();
                 }
@@ -115,7 +115,7 @@
                         body: JSON.stringify({ withUserName: u })
 
                     });
-                    await loadALl();
+                    await loadAll();
                 }
 
                 li.appendChild(cancelBtn);
