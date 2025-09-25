@@ -1,4 +1,4 @@
-<!--@{
+﻿<!--@{
     ViewData["Title"] = "Чат";
 
 }
@@ -64,7 +64,7 @@ return console.error(err.toString());
     (async () => {
         try{
     const friends = await (await fetch("/friends")).json();
-    const {incoming, outgoing} = await (await fetch("/friends/requests").json();
+    const {incoming, outgoing} = await (await fetch("/friends/requests")).json();
     console.log("friends", friends, "incoming", incoming, "outgoing", outgoing);
         }
     catch(e){console.error("friends load error", e);}
@@ -287,7 +287,7 @@ messagesList.appendChild(li);
         return await res.json();
     }
     async function loadRequests(){
-        const res = await fetch("/friends/request");
+        const res = await fetch("/friends/requests");
         if (!res.ok){
             console.error("Ошибка загузки заявок", await res.text());
             return {incoming: [], outgoing: []};

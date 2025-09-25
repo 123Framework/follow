@@ -26,7 +26,21 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Friend" asp-action="Index">Friends</a>
+                        </li>
                     </ul>
+                </div>
+                <div class="friends-panel">
+                    <h3>Друзья</h3>
+                    <ul id="friendsList"></ul>
+
+                    <h4>Входящие заявки</h4>
+                    <ul id="incomingList"></ul>
+
+                    <div class="add-friend">
+                        <input id="addFriendInput" placeholder="username..."/>
+                        <button id="sendFriendBtn" type="button">Добавить</button>
                 </div>
                 <ul class="navbar-nav ms-auto">
                     @if (SignInManager.IsSignedIn(User))

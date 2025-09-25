@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Friends";
+    Layout = "_Layout";
+}
+
+<h2 class="mb-3">Friends</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Your friends</h4>
+
+        <ul id="friendsList" class="list-group mb-4"></ul>
+    </div>
+    <div class="col-md-6">
+        <h4>Requests</h4>
+        <div class="d-flex gap-2">
+            <input id="toUser" class="form-control" placeholder="Username..." />
+            <button id="sendBtn" class="btn btn-primary">Send request</button>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h5>Incoming</h5>
+                <ul id="incomingList" class="list-group"></ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Outgoing</h5>
+                <ul id="outgoingList" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+            async function loadAll(){
+                await Promise.all([loadFriends(), loadPending]);
+            }
+            async function loadFriends(){
+                const res = await fetch('/friends/list');
+                const data = await res.json();
+                const ul = document.getElementById('friendsList');
+                ul.innerHTML = '';
+                (data.friends || []).forEach(u =>{
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.textContent = u;
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-sm btn-outline-danger';
+                    btn.textContent = 'Remove';
+                    btn.onclick = async () =>{
+                        if(confirm('Remove' + u + 'from friends?')){
+                            await fetch('/friends/'+ encodeURIComponent(u), {method:'DELETE'});
+                            await loadAll();
+                        }
+                    }
+
+                    li.appendChild(btn);
+                    ul.appendChild(li);
+                });
+            }
+            async function loadPending(){
+                const res = await fetch('/friends/pending');
+                const data = await res.json();
+                const incoming = document.getElementById('incomingList');
+                const outgoing = document.getElementById('outgoingList');
+                incoming.innerHTML = '';
+                outgoing,innerHTML = '';
+
+            (data.incoming || []).forEach(u =>{
+                const li = document.createElement("li");
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.textContent = u;
+                const group = document.createElement('div');
+                const acceptBtn = document.createElement('button');
+                acceptBtn.className = 'btn btn-sm btn-success me-2';
+                acceptBtn.textContent = 'Accept';
+                acceptBtn.onclick = async () => {
+                    await fetch('/friends/accept',{
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({with UserName: u})
+                    });
+                    await loadAll();
+                }
+                const declineBtn = document.createElement('button');
+                declineBtn.className = 'btn btn-sm btn-outline-secondary';
+                declineBtn.textContent = 'Decline';
+                declineBtn.onclick = async () =>{
+                    await fetch('/friends/decline',{
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({withUserName: u})
+                    });
+                    await loadAll();
+
+
+                }
+                    group.appendChild(acceptBtn);
+                    group.appendChild(declineBtn);
+                    li.appendChild(group);
+                    incoming.appendChild(li);
+
+            });
+            (data.outgoing || []).forEach(u => {
+                const li = document.createElement("li");
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.textContent = u;
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-sm btn-outline-danger';
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.onclick = async () => {
+                    await fetch('/friends/cancel', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({ withUserName: u })
+
+                    });
+                    await loadALl();
+                }
+
+                li.appendChild(cancelBtn);
+                outgoing.appendChild(li);
+            });
+            document.getElementById('sendBtn').addEventListener('click', async ()=>{
+                const to = document.getElementById('toUser').value.trim();
+                if(!to) return;
+
+                const res = await fetch('/friends/request',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({toUserName: to})
+                });
+                if(res.ok){
+                    document.getElementById('toUser').value='';
+                    await loadAll();
+
+                }else{
+                    const msg = await res.text();
+                    alert(msg || 'Failed to send request' );
+                }
+            })
+            //signal R
+            const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/chatHub')
+            .withAutomaticReconnect()
+            .build()
+
+            connection.on('FriendListUpdated', () => {loadAll();});
+            connection.start().then(loadAll).catch(err=> console.error(err));
+    </script>
+}
