@@ -10,7 +10,7 @@ namespace TweeterApp.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("friends")]
+    [Route("friends/api")]
     public class FriendController : Controller
     {
 
@@ -210,6 +210,8 @@ namespace TweeterApp.Controllers
         }
 
 
+        [HttpGet("/friends")]
+        public IActionResult Index() => View("Index");
 
 
 
