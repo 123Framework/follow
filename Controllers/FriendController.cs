@@ -157,7 +157,8 @@ namespace TweeterApp.Controllers
           }*/
 
 
-
+        [HttpGet]
+        public Task<IActionResult> ListRoot() => List();
 
 
         // POST /friends/accept
