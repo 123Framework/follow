@@ -211,7 +211,7 @@ namespace TweeterApp.Controllers
 
 
         [HttpGet("/friends")]
-        public IActionResult Index() => View("Index");
+        public IActionResult Index() { return View("Index"); }
 
 
 
