@@ -155,7 +155,7 @@
 
             async function loadFriends(){
                 try{
-                    const res = await fetch('/friends/list');
+                    const res = await fetch('/friends/api/list');
                     if (!res.ok) { console.error('friends/list', res.status, await res.text()); return; }
                     const data = await res.json();
 
@@ -185,7 +185,7 @@
 
             async function loadPending(){
                 try{
-                    const res = await fetch('/friends/pending');
+                    const res = await fetch('/friends/api/pending');
                     if (!res.ok) { console.error('friends/pending', res.status, await res.text()); return; }
                     const data = await res.json();
 
@@ -205,7 +205,7 @@
                         acceptBtn.className = 'btn btn-sm btn-success me-2';
                         acceptBtn.textContent = 'Accept';
                         acceptBtn.onclick = async () => {
-                            const r = await fetch('/friends/accept',{
+                            const r = await fetch('/friends/api/accept',{
                                 method: 'POST',
                                 headers: {'Content-Type':'application/json'},
                                 body: JSON.stringify({ withUserName: u })
@@ -218,7 +218,7 @@
                         declineBtn.className = 'btn btn-sm btn-outline-secondary';
                         declineBtn.textContent = 'Decline';
                         declineBtn.onclick = async () =>{
-                            const r = await fetch('/friends/decline',{
+                            const r = await fetch('/friends/api/decline',{
                                 method: 'POST',
                                 headers: {'Content-Type':'application/json'},
                                 body: JSON.stringify({ withUserName: u })
@@ -242,7 +242,7 @@
                         cancelBtn.className = 'btn btn-sm btn-outline-danger';
                         cancelBtn.textContent = 'Cancel';
                         cancelBtn.onclick = async () => {
-                            const r = await fetch('/friends/cancel', {
+                            const r = await fetch('/friends/api/cancel', {
                                 method: 'POST',
                                 headers: {'Content-Type':'application/json'},
                                 body: JSON.stringify({ withUserName: u })
@@ -261,7 +261,7 @@
                 const to = document.getElementById('toUser').value.trim();
                 if(!to) return;
 
-                const res = await fetch('/friends/request',{
+                const res = await fetch('/friends/api/request',{
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
                     body: JSON.stringify({ toUserName: to })
