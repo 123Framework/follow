@@ -8,7 +8,7 @@ namespace TweeterApp.Controllers
     public class FriendsPageController : Controller
     {
         [HttpGet("/friends")]
-        public IActionResult Index() { return View("Index"); }
+        public IActionResult Index() { return View("~/Views/Friend/Index.cshtml"); }
 
     }
 }
