@@ -216,15 +216,16 @@ namespace TweeterApp.Controllers
         // [HttpPost("remove")]
 
         [HttpDelete("{otherUserName}")]
-        public async Task<IActionResult> Remove([FromBody] string otherUserName)
+        public async Task<IActionResult> Remove( string otherUserName)
         {
             var me = User.Identity!.Name;
             var other = (otherUserName ?? string.Empty).Trim();
             if (string.IsNullOrEmpty(other)) return BadRequest("Username is required");
             var fr = await _db.Friendships.FirstOrDefaultAsync(f =>
+            f.Status == FriendshipStatus.Accepted&&(
             (f.RequesterUserName == me && f.AddresseeUserName == other) ||
-            (f.RequesterUserName == other && f.AddresseeUserName == me) &&
-            f.Status == FriendshipStatus.Accepted);
+            (f.RequesterUserName == other && f.AddresseeUserName == me)));
+           
 
             if (fr == null) return NotFound();
             _db.Friendships.Remove(fr);

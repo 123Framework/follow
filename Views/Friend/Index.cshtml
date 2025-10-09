@@ -171,7 +171,7 @@
                         btn.textContent = 'Remove';
                         btn.onclick = async () =>{
                             if (confirm(`Remove ${u} from friends?`)) {
-                                const r = await fetch('/friends/'+ encodeURIComponent(u), { method:'DELETE' });
+                                const r = await fetch('/friends/api/'+ encodeURIComponent(u), { method:'DELETE' });
                                 if (!r.ok) alert(await r.text());
                                 await loadAll();
                             }
@@ -300,4 +300,3 @@
     </script>
 }
     </script>
-}
