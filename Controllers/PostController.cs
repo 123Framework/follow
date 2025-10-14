@@ -152,11 +152,7 @@ namespace TweeterApp.Controllers
                 
             await _postRepository.UpdateAsync(post);
             return RedirectToAction("Index");
-            //if (ModelState.IsValid)
-            //{
-
-            // }
-            // return View(post);
+            
         }
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
@@ -183,7 +179,7 @@ namespace TweeterApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var post = await _postRepository.GetByIdAsync(id);
-            if (post.UserId != int.Parse(_userManager.GetUserId(User))) return Forbid(); // used to be UserModel
+            if (post.UserId != int.Parse(_userManager.GetUserId(User))) return Forbid(); 
 
             await _postRepository.DeleteAsync(id);
             return RedirectToAction("Index");

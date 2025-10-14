@@ -44,7 +44,6 @@ namespace TweeterApp
 
         public async Task SendMessage(string toUsername, string message)
         {
-            //var fromUsername = Context.User.Identity.Name ?? "Anonymous";
             var me = Context.User?.Identity?.Name?.Trim().ToLowerInvariant() ?? "";
             toUsername = toUsername?.Trim().ToLowerInvariant() ?? "";
             if (string.IsNullOrWhiteSpace(toUsername)|| string.IsNullOrWhiteSpace(me) || string.IsNullOrWhiteSpace(message))
@@ -106,7 +105,6 @@ namespace TweeterApp
             var key = ReactionKey(messageId, emoji);
 
 
-            //var users = _reactions.GetOrAdd(key, _ => new ConcurrentDictionary<string, byte>());
 
             var mukey = UserMsgKey(messageId, me);
             bool added;
@@ -153,7 +151,6 @@ namespace TweeterApp
         }
         public async Task SendImage(string toUsername, string imageUrl, string? caption = null)
         {
-            //var from = Context.User?.Identity?.Name ?? "Anonymous";
 
             var me = Context.User?.Identity?.Name?.Trim().ToLowerInvariant() ?? "";
             toUsername = toUsername?.Trim().ToLowerInvariant() ?? "";
