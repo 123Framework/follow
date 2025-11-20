@@ -1,101 +1,115 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FitLog.Infrastructure.Data;
+using FitLog.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TweeterApp.Models;
-using TweeterApp.Models.ViewModels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace TweeterApp.Controllers
+namespace FitLog.Controllers
 {
-    public class AccountController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+
+    public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private ILogger<AccountController> _logger;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            
-            if (ModelState.IsValid)
-            {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    DateOfBirth = model.DateOfBirth,
-                    DateCreated = DateTime.Now,
-                    DateModified = DateTime.Now,
-                    ActiveAccount = true,
-                    GenderId = model.GenderId,
-                    AvatarPath = "/uploads/default.png",
-                    Bio = "-"
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, "User");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User {Email} registered succesfully.", model.Email);
-                    return RedirectToAction("Index", "Home");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-            }
-            _logger.LogWarning("Model state isn't valid(or other error)");
-            return View(model);
-        }
-
-        [AllowAnonymous]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                ModelState.AddModelError("", "Invalid login attempt");
-            }
-            return View(model);
-        }
-
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
-        }
-
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;   
+
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            var user = new AppUser
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                DisplayName = dto.DisplayName,
+                HeightCm = dto.HeightCm,
+                WeightKg = dto.WeightKg,
+            };
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+
+            }
+            await _signInManager.SignInAsync(user, isPersistent: true);
+            return Ok(new { Message = "Регистрация успешна" });
+
+        }
+        /*[HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, true, false);
+            if (!result.Succeeded)
+            {
+                return Unauthorized("неверный логин или пароль");
+            }
+
+            return Ok(new { Message = "Вход выполнен" });
+        }
+        */
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginVM model)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            Console.WriteLine($"Login Attempt: {model.Email}/{model.Password}");
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null) return Unauthorized();
+
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: true, lockoutOnFailure: false);
+            Console.WriteLine($"Login attempt for {user.Email}:{result.Succeeded}");
+            if (result.Succeeded)
+                return Ok(new { message = "Login successful" });
+
+            return Unauthorized(new { message = "invalid credentials" });
+        }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok(new { Message = "выход выполнен" });
         }
 
-
-        [HttpGet]
-        public IActionResult AccessDenied() {
-            return View();
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+                return Unauthorized(new { message = "Not logged in" });
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) 
+                return Unauthorized(new {message = "User not found"});
+            return Ok(new
+            {
+                email = user.Email,
+                displayName = user.DisplayName,
+                heightCm = user.HeightCm,
+                weightKg = user.WeightKg,
+            });
         }
+
     }
+
+
+
+    public class RegisterDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public double HeightCm { get; set; }
+        public double WeightKg { get; set; }
+
+    }
+    public class LoginDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+
+
 }

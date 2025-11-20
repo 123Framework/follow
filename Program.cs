@@ -1,86 +1,74 @@
+using FitLog.Domain.Entities;
+using FitLog.Infrastructure.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TweeterApp;
-using TweeterApp.Data;
-using TweeterApp.Models;
-using TweeterApp.Repository;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+// Add services to the container.
 
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection")));
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
+builder.Services.AddIdentity<AppUser, AppRole>(options =>
 {
-    options.SignIn.RequireConfirmedEmail = false; options.Password.RequiredLength = 6;
     options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
     options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = true;
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
-})
+    options.Password.RequireNonAlphanumeric = false;
 
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders()
+    ;
 
-builder.Services.ConfigureApplicationCookie(config =>
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    config.Cookie.Name = "MyCookie";
-    config.LoginPath = "/Account/Login";
-    config.AccessDeniedPath = "/Account/AccessDenied";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.LoginPath = "/api/account/login";
+    options.LogoutPath = "/api/account/logout";
+
+
 });
-builder.Services.AddMemoryCache();
-builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
-builder.Services.AddScoped<IPostRepository, PostRepository>(); 
-builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
-builder.Services.AddScoped<ILikeRepository, LikeRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-
-builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
-
-builder.Services.AddScoped<ISavedPostRepository, SavedPostRepository>();
-var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+builder.Services.AddCors(options =>
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleExist = await roleManager.RoleExistsAsync("User");
-    if (!roleExist)
+    options.AddPolicy("AllowLocalhost", policy =>
     {
-        var role = new IdentityRole<int>("User");
-        await roleManager.CreateAsync(role);
-    }
-}
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
-if (!app.Environment.IsDevelopment())
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
 
+
+app.UseCors("AllowLocalhost");
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.UseHttpsRedirection();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
-app.MapHub<ChatHub>("/chatHub");
+app.MapControllers();
 
 app.Run();
